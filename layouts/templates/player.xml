@@ -11,7 +11,7 @@
             color='#00000000'
             hover-color='#FFFFFF2B'
             padding='0'
-            onclick='player(%{id})'>
+            onclick='player("%{id}")'>
         <image id="player_action_%{id}" src='%{player_action}' size='32,32' color='#FFFFFF50'/>
     </button>
 </container>

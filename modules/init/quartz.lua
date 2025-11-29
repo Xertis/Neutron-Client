@@ -18,5 +18,9 @@ local function main()
     end
 end
 
-print(pcall(main))
-print(debug.traceback())
+xpcall(main, function (error)
+    print(debug.traceback(error, 2))
+end)
+
+--print(pcall(main))
+--print(debug.traceback())

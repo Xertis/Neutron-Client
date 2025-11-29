@@ -8,7 +8,7 @@
 
     <label id="online" gravity="bottom-left" margin="15,0,0,15">Online: 0/0</label>
     <label id="ping" gravity="bottom-left" margin="15,0,0,40">Ping: -1ms</label>
-    <label id="pid" gravity="bottom-left" margin="15,0,0,65">Pid: -1</label>
+    <label id="pid" gravity="bottom-left" margin="15,0,0,65">PID: -1</label>
 
     <panel pos="15,15" size="200,380" color="#00000000" interval="30">
         <button onclick='menu:reset()'>@Continue</button>

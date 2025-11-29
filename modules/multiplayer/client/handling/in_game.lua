@@ -65,12 +65,13 @@ handlers[protocol.ServerMsg.BlockChanged] = function (server, packet)
     if pid ~= -1 and pid ~= CLIENT_PLAYER.pid then
         if old_id ~= 0 and new_id == 0 then
             block.destruct(packet.x, packet.y, packet.z, pid)
+            return
         elseif old_id == 0 and new_id ~= 0 then
             block.place(packet.x, packet.y, packet.z, new_id, packet.block_state, pid)
+            return
         end
-    else
-        block.set(packet.x, packet.y, packet.z, packet.block_id, packet.block_state, pid)
     end
+    block.set(packet.x, packet.y, packet.z, packet.block_id, packet.block_state, pid)
 end
 
 handlers[protocol.ServerMsg.TimeUpdate] = function (server, packet)

@@ -4,7 +4,7 @@
 
     <label pos='15,100'>@Server_add</label>
     <textbox pos='15,115' size='260,30' id='server_name' hint='@Server_name'></textbox>
-    <textbox pos='15,150' size='260,30' id='ip' hint='IP'></textbox>
+    <textbox pos='15,150' size='260,30' id='ip' hint='IP:Port'></textbox>
     <button pos='15,195' size='260,30' onclick='add_server()'>@Server_add</button>
 
     <button pos='15,525' size='227,40' onclick='finish()'>@menu.Apply</button>
