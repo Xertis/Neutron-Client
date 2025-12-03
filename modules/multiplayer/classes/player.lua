@@ -44,10 +44,10 @@ end
 function Player:set_pos(pos, set_flag)
     if pos == nil then return end
 
-    local interpolated = CLIENT_PLAYER.pid == self.pid
+    local no_interpolated = CLIENT_PLAYER.pid == self.pid
 
     self.pos = {x = pos.x, y = pos.y, z = pos.z}
-    player.set_pos(self.pid, pos.x, pos.y, pos.z, interpolated)
+    player.set_pos_interpolated(self.pid, pos.x, pos.y, pos.z, no_interpolated)
     player.set_spawnpoint(self.pid, pos.x, math.abs(pos.y), pos.z)
 
     self.region = {

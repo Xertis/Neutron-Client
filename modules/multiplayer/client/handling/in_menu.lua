@@ -34,20 +34,15 @@ end
 handlers[protocol.ServerMsg.PacksList] = function (server, packet)
     local packs = packet.packs
 
-    local pack_available = table.unique(table.merge(pack.get_available(), pack.get_installed()))
+    local packs_all = table.unique(table.merge(pack.get_available(), pack.get_installed()))
     local hashes = {}
 
-    for i = #packs, 1, -1 do
-        if not table.has(pack_available, packs[i]) then
-            table.remove(packs, i)
-        end
-    end
+    table.filter(packs, function (_, val)
+        return table.has(packs_all, val)
+    end)
 
     for i=1, #packs do
-        local _pack = packs[i]
-        if not table.has(CONTENT_PACKS, _pack) then
-            table.insert(CONTENT_PACKS, _pack)
-        end
+        table.insert_unique(CONTENT_PACKS, packs[i])
     end
 
     local events_handlers = table.copy(events.handlers)

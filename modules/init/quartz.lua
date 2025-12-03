@@ -1,9 +1,8 @@
 require "quartz:constants"
+require "quartz:globals"
 require "quartz:std/stdboot"
 require "quartz:init/client"
 local Client = require "quartz:multiplayer/client/client"
-
-table.insert(CONTENT_PACKS, "quartz")
 
 local client = Client.new()
 
@@ -21,6 +20,3 @@ end
 xpcall(main, function (error)
     print(debug.traceback(error, 2))
 end)
-
---print(pcall(main))
---print(debug.traceback())

@@ -82,7 +82,7 @@ handlers[protocol.ServerMsg.TimeUpdate] = function (server, packet)
 end
 
 handlers[protocol.ServerMsg.ChatMessage] = function (server, packet)
-    console.chat("| "..packet.message)
+    console.chat(packet.message)
 end
 
 handlers[protocol.ServerMsg.SynchronizePlayerPosition] = function (server, packet)

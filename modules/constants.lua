@@ -2,11 +2,8 @@ CONFIG = {}
 
 PACK_ID = "quartz"
 CONFIG_PATH = pack.shared_file(PACK_ID, "config.json")
-CONTENT_PACKS = {}
 
 CHUNK_LOADING_DISTANCE = 0
-
-CACHED_DATA = {over = false}
 
 COLORS = {
     red =    "[#ff0000]",
@@ -17,9 +14,3 @@ COLORS = {
     white =  "[#FFFFFF]",
     gray =   "[#4d4d4d]"
 }
-
-PLAYER_LIST = {}
-TEMP_PLAYERS = {}
-CLIENT_PLAYER = nil
-CLIENT = nil
-SERVER = nil

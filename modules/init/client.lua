@@ -24,19 +24,20 @@ CONFIG = table.merge(json.parse(file.read(CONFIG_PATH)), default_config)
 
 -- Инициализацация паков
 function initializator.init_packs()
-    for i=#CONTENT_PACKS, 1, -1 do
-        table.remove(CONTENT_PACKS, i)
-    end
+    table.filter(CONTENT_PACKS, function ()
+        return false
+    end)
 
     external_app.reset_content()
+    table.insert(CONTENT_PACKS, PACK_ID)
+
     for _, pack in ipairs(pack.get_available()) do
         if table.has(CONFIG.Pinned_packs, pack) then
-            external_app.reconfig_packs({pack}, {})
-            table.insert(CONTENT_PACKS, pack)
+            table.insert_unique(CONTENT_PACKS, pack)
         end
     end
 
-    external_app.reconfig_packs({"quartz"}, {})
+    external_app.config_packs(CONTENT_PACKS)
     external_app.load_content()
 end
 

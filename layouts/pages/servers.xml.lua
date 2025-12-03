@@ -98,7 +98,7 @@ end
 
 function remove_server(id)
     table.remove(CONFIG.Servers, id)
-    file.write(CONFIG_PATH, json.tostring(CONFIG))
+    update_config()
 
     document["serverdata_" .. id]:destruct()
 end
@@ -140,7 +140,7 @@ function edit_server(data)
 end
 
 function finish_edit()
-    file.write(CONFIG_PATH, json.tostring(CONFIG))
+    update_config()
     edited_server = nil
     refresh()
     document.server_edit:destruct()

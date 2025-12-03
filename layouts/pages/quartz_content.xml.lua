@@ -1,21 +1,24 @@
-function on_open(params)
-    if params then
-        mode = params.mode
-    end
+function on_open()
     refresh()
 end
 
 -- add - packs to be added to the world (after apply)
 -- rem - packs that should be removed from the world (after apply)
-add_packs = {}
-rem_packs = {}
+local add_packs = {}
+local rem_packs = {}
 
 -- included - connected packs to the world
 -- excluded - packs that are not connected to the world
-packs_included = {}
-packs_excluded = {}
+local packs_included = {}
+local packs_excluded = {}
 
-packs_info = {}
+local packs_info = {}
+
+local packs_installed = {}
+local packs_available = {}
+local base_packs = {}
+local packs_all = {}
+local required = {}
 
 local function include(id, is_include)
     if is_include then
@@ -28,29 +31,20 @@ local function include(id, is_include)
 end
 
 function apply()
-    if not table.has(add_packs, PACK_ID) then
-        table.insert(add_packs, "quartz")
+    for _, pack in ipairs(add_packs) do
+        table.insert_unique(CONTENT_PACKS, pack)
     end
 
-    for i, pack in ipairs(rem_packs) do
-        if table.has(add_packs, pack) then
-            table.remove(add_packs, i)
-        end
-    end
-
-    for i=#CONTENT_PACKS, 1, -1 do
-        if CONTENT_PACKS[i] ~= PACK_ID then table.remove(CONTENT_PACKS, i) end
-    end
+    table.filter(CONTENT_PACKS, function (_, val)
+        return not table.has(rem_packs, val)
+    end)
 
     external_app.reset_content()
-    external_app.reconfig_packs(add_packs, {})
+    external_app.config_packs(CONTENT_PACKS)
     core.load_content()
 
-    CONTENT_PACKS = table.unique(table.merge(CONTENT_PACKS, add_packs))
     initializator.init_pack_scripts()
-    if mode ~= "world" then
-        menu:back()
-    end
+    menu:back()
 end
 
 function reposition_func(_pack)
@@ -145,7 +139,7 @@ function move_pack(id)
 end
 
 function pin(id)
-    if not table.has(packs_included, id) then
+    if not table.has(packs_included, id) or not table.has(add_packs, id) then
         move_pack(id)
     end
 
@@ -157,7 +151,7 @@ function pin(id)
         document["pin_" .. id].color = {255, 255, 255, 255}
     end
 
-    file.write(CONFIG_PATH, json.tostring(CONFIG))
+    update_config()
 end
 
 function place_pack(panel, packinfo, callback, position_func)
@@ -236,14 +230,6 @@ function refresh()
     local packs_add = document.packs_add
     packs_cur:clear()
     packs_add:clear()
-
-    -- Блокируем пакет, содержащий используемый генератор
-    if world.is_open() then
-        local genpack, genname = parse_path(world.get_generator())
-        if genpack ~= "core" then
-            table.insert(base_packs, genpack)
-        end
-    end
 
     local packids = {unpack(packs_installed)}
     for i,k in ipairs(packs_available) do

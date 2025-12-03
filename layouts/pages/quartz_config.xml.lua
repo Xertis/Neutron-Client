@@ -29,6 +29,6 @@ end
 function finish()
     CONFIG.Account.name = name
 
-    file.write(CONFIG_PATH, json.tostring(CONFIG))
+    update_config()
     menu:back()
 end

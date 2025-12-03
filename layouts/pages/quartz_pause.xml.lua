@@ -33,7 +33,7 @@ function player(id)
         table.insert(CONFIG.Account.friends, name)
     end
 
-    file.write(CONFIG_PATH, json.tostring(CONFIG))
+    update_config()
 end
 
 function update()

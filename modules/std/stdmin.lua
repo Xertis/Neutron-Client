@@ -11,12 +11,10 @@ _G['$Multiplayer'] = {
 
 --- PLAYER
 
-local set_pos = player["set_pos"]
-
-player.set_pos = function (pid, x, y, z, no_interpolated)
+player.set_pos_interpolated = function (pid, x, y, z, no_interpolated)
     no_interpolated = no_interpolated or false
     if not _G["$Multiplayer"] or no_interpolated then
-        set_pos(pid, x, y, z)
+        player.set_pos(pid, x, y, z)
         return
     end
 
@@ -32,7 +30,7 @@ player.set_pos = function (pid, x, y, z, no_interpolated)
         local distance = vec3.length(direction)
 
         if distance > 5 or distance < 0.01 then
-            set_pos(pid, x, y, z)
+            player.set_pos(pid, x, y, z)
             rigidbody:set_vel({0, 0, 0})
         elseif rigidbody then
             local time_to_reach = 0.1
@@ -40,7 +38,7 @@ player.set_pos = function (pid, x, y, z, no_interpolated)
             rigidbody:set_vel(velocity)
         end
     else
-        set_pos(pid, x, y, z)
+        player.set_pos(pid, x, y, z)
     end
 end
 
