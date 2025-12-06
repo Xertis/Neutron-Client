@@ -2,6 +2,14 @@ local Player = {}
 local max_id = 0
 Player.__index = Player
 
+local function is_chunk_loaded(x, z)
+    local check_x = math.floor(x)
+    local check_y = 60
+    local check_z = math.floor(z)
+
+    return block.get(check_x, check_y, check_z) ~= -1
+end
+
 function Player.new(pid, name, pos, rot, cheats)
     local self = setmetatable({}, Player)
 
@@ -22,6 +30,8 @@ function Player.new(pid, name, pos, rot, cheats)
     }
 
     self.id = max_id
+    self.is_loaded = false
+    self.pending_updates = {}
 
     self.changed_flags = {
         pos = false,
@@ -37,34 +47,75 @@ function Player.new(pid, name, pos, rot, cheats)
     return self
 end
 
-function Player:is_active()
-    return self.active
+function Player:is_chunk_loaded()
+    return is_chunk_loaded(self.pos.x, self.pos.z)
+end
+
+function Player:apply_pending_updates()
+    if self.pending_updates.pos then
+        local pos = self.pending_updates.pos
+        player.set_pos_interpolated(self.pid, pos.x, pos.y, pos.z, CLIENT_PLAYER.pid == self.pid)
+        player.set_spawnpoint(self.pid, pos.x, math.abs(pos.y), pos.z)
+        self.pending_updates.pos = nil
+        self.changed_flags.pos = true
+        self.changed_flags.region = true
+    end
+
+    if self.pending_updates.rot then
+        local rot = self.pending_updates.rot
+        player.set_rot(self.pid, rot.yaw, rot.pitch, 0)
+        self.pending_updates.rot = nil
+        self.changed_flags.rot = true
+    end
+
+    if self.pending_updates.cheats then
+        local cheats = self.pending_updates.cheats
+        player.set_flight(self.pid, cheats.flight)
+        player.set_noclip(self.pid, cheats.noclip)
+        self.pending_updates.cheats = nil
+        self.changed_flags.cheats = true
+    end
 end
 
 function Player:set_pos(pos, set_flag)
     if pos == nil then return end
 
-    local no_interpolated = CLIENT_PLAYER.pid == self.pid
+    local cur_loaded = self:is_chunk_loaded()
 
     self.pos = {x = pos.x, y = pos.y, z = pos.z}
-    player.set_pos_interpolated(self.pid, pos.x, pos.y, pos.z, no_interpolated)
-    player.set_spawnpoint(self.pid, pos.x, math.abs(pos.y), pos.z)
 
     self.region = {
         x = math.floor(pos.x / 32),
         z = math.floor(pos.z / 32)
     }
 
-    if set_flag then self.changed_flags.pos = true self.changed_flags.region = true end
+    if set_flag then
+        self.changed_flags.region = true
+    end
+
+    if cur_loaded then
+        local no_interpolated = CLIENT_PLAYER.pid == self.pid
+        player.set_pos_interpolated(self.pid, pos.x, pos.y, pos.z, no_interpolated)
+        player.set_spawnpoint(self.pid, pos.x, math.abs(pos.y), pos.z)
+        if set_flag then self.changed_flags.pos = true end
+        self.pending_updates.pos = nil
+    else
+        self.pending_updates.pos = pos
+    end
 end
 
 function Player:set_rot(rot, set_flag)
     if rot == nil then return end
 
     self.rot = {yaw = rot.yaw, pitch = rot.pitch}
-    player.set_rot(self.pid, rot.yaw, rot.pitch, 0)
 
-    if set_flag then self.changed_flags.rot = true end
+    if self:is_chunk_loaded() then
+        player.set_rot(self.pid, rot.yaw, rot.pitch, 0)
+        if set_flag then self.changed_flags.rot = true end
+        self.pending_updates.rot = nil
+    else
+        self.pending_updates.rot = rot
+    end
 end
 
 function Player:set_cheats(cheats, set_flag)
@@ -72,17 +123,22 @@ function Player:set_cheats(cheats, set_flag)
 
     if CLIENT_PLAYER.pid ~= self.pid then
         if self.cheats.noclip == false then
-            self.cheats = {noclip = true, flight = true}
-            player.set_flight(self.pid, true)
-            player.set_noclip(self.pid, true)
+            cheats = {noclip = true, flight = true}
+
         end
     end
 
     self.cheats = {noclip = cheats.noclip, flight = cheats.flight}
-    player.set_flight(self.pid, cheats.flight)
-    player.set_noclip(self.pid, cheats.noclip)
 
-    if set_flag then self.changed_flags.cheats = true end
+    if self:is_chunk_loaded() then
+
+        player.set_flight(self.pid, cheats.flight)
+        player.set_noclip(self.pid, cheats.noclip)
+        if set_flag then self.changed_flags.cheats = true end
+        self.pending_updates.cheats = nil
+    else
+        self.pending_updates.cheats = cheats
+    end
 end
 
 function Player:set_inventory(inv, set_flag)
@@ -106,6 +162,29 @@ function Player:set_hand_item(hand_item)
     local invid, slot = player.get_inventory(self.pid)
 
     inventory.set(invid, slot, hand_item, 1)
+end
+
+
+function Player:tick()
+    local cur_loaded = self:is_chunk_loaded()
+    if cur_loaded and not self.is_loaded then
+        self:apply_pending_updates()
+    end
+
+    self.is_loaded = cur_loaded
+
+    if self.is_loaded then
+        self:__check_pos()
+        self:__check_rot()
+        self:__check_cheats()
+    end
+
+    self:__check_inv()
+    self:__check_slot()
+end
+
+function Player:is_active()
+    return self.active
 end
 
 function Player:__check_pos()
@@ -160,14 +239,6 @@ function Player:__check_slot()
         self.slot = cur_slot
         self.changed_flags.slot = true
     end
-end
-
-function Player:tick()
-    self:__check_pos()
-    self:__check_rot()
-    self:__check_cheats()
-    self:__check_inv()
-    self:__check_slot()
 end
 
 function Player:despawn()
