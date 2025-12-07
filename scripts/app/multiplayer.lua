@@ -10,20 +10,6 @@ gui_util.add_page_dispatcher(function(name, args)
     return name, args
 end)
 
-_G["leave_to_menu"] = function (reason)
-    local world_is_open = world.is_open()
-    if world_is_open then
-        app.close_world(false)
-    end
-
-    if world_is_open or menu.page == "quartz_connection" then
-        initializator.init_packs()
-        menu.page = "quartz_connection"
-        local document = Document.new("quartz:pages/quartz_connection")
-        document.info.text = reason or "Unexpected disconnection"
-    end
-end
-
 local protect_app = {}
 
 for key, val in pairs(app) do
@@ -40,19 +26,25 @@ end
 
 _G["external_app"] = protect_app
 
--- _G["leave_to_menu"] = function (reason)
---     if world.is_open() then
---         app.close_world(false)
---     end
+_G["leave_to_menu"] = function (reason)
+    local world_is_open = world.is_open()
+    if world_is_open then
+        app.close_world(false)
+    end
 
---     app.reset_content()
---     menu:reset()
---     app.config_packs({PACK_ID})
---     app.load_content()
---     menu.page = "quartz_connection"
+    if world_is_open or menu.page == "quartz_connection" then
+        app.reset_content()
+        app.config_packs({ "quartz" })
+        app.load_content()
 
---     local document = Document.new("quartz:pages/quartz_connection")
---     document.info.text = reason or "@menu.Unexpect_Disconnected"
--- end
+        _G["external_app"] = protect_app
+        require "quartz:init/quartz"
+
+        print("меняем page")
+        menu.page = "quartz_connection"
+        local document = Document.new("quartz:pages/quartz_connection")
+        document.info.text = reason or "Unexpected disconnection"
+    end
+end
 
 require "quartz:init/quartz"
