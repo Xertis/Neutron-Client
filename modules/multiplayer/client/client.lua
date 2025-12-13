@@ -26,6 +26,7 @@ function Client:connect(address, port, name, state, id, handlers)
         server:set("network", network)
         server.connecting = false
         server.state = state or 0
+        socket:set_nodelay(true)
 
         if handlers.on_connect then
             handlers.on_connect(server)
