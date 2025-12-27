@@ -4,7 +4,11 @@ local module = {}
 local handlers = {}
 
 function module.send(pack, event, bytes)
-    SERVER:push_packet(protocol.ClientMsg.PackEvent, pack, event, bytes)
+    SERVER:push_packet(protocol.ClientMsg.PackEvent, {
+        pack = pack,
+        event = event,
+        bytes = bytes
+    })
 end
 
 function module.on(pack, event, func)

@@ -5,13 +5,21 @@ local hash = require "lib/common/hash"
 local handlers = {}
 
 handlers["handshake"] = function (server)
-    if server.state == 0  then
+    if server.state == -1  then
         local major, minor = external_app.get_version()
         local engine_version = string.format("%s.%s.0", major, minor)
 
         local buffer = protocol.create_databuffer()
-        buffer:put_packet(protocol.build_packet("client", protocol.ClientMsg.HandShake, engine_version, "Neutron", protocol.data.version, CONFIG.Account.friends, protocol.States.Status))
-        buffer:put_packet(protocol.build_packet("client", protocol.ClientMsg.StatusRequest))
+        buffer:put_packet(protocol.build_packet("client", protocol.ClientMsg.HandShake, {
+            protocol_reference = "Neutron",
+            protocol_version = protocol.Version,
+            engine_version = engine_version,
+            api_version = API_VERSION,
+            friends_list = CONFIG.Account.friends,
+            next_state = protocol.States.Status
+        }))
+        buffer:put_packet(protocol.build_packet("client", protocol.ClientMsg.StatusRequest, {}))
+
         server.network:send(buffer.bytes)
 
         server.state = protocol.States.Status
@@ -55,13 +63,15 @@ handlers[protocol.ServerMsg.PacksList] = function (server, packet)
     events.handlers = table.merge(events_handlers, events.handlers)
 
     for i, pack in ipairs(packs) do
-        table.insert(hashes, pack)
-        table.insert(hashes, hash.hash_mods({ pack }))
+        table.insert(hashes, {
+            pack = pack,
+            hash = hash.hash_mods({ pack })
+        })
     end
 
     local buffer = protocol.create_databuffer()
 
-    buffer:put_packet(protocol.build_packet("client", protocol.ClientMsg.PacksHashes, hashes))
+    buffer:put_packet(protocol.build_packet("client", protocol.ClientMsg.PackHashes, {hashes}))
     server.network:send(buffer.bytes)
 end
 
@@ -73,8 +83,8 @@ handlers[protocol.ServerMsg.JoinSuccess] = function (server, packet)
     external_app.reset_content()
     external_app.config_packs(CONTENT_PACKS)
 
-    external_app.new_world("", "41530140565755", PACK_ID .. ":void", packet.entity_id)
-    CLIENT.pid = packet.entity_id
+    external_app.new_world("", "41530140565755", PACK_ID .. ":void", packet.pid)
+    CLIENT.pid = packet.pid
 
     CHUNK_LOADING_DISTANCE = packet.chunks_loading_distance
 

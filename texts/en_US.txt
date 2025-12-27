@@ -10,3 +10,5 @@ menu.Unexpect_Disconnected=Server unexpectedly shut down, client disconnected
 quartz.player_list=Player list
 quartz.cancel=Cancel
 quartz.done=Done
+quartz.neutron_version=Neutron version
+quartz.engine_version=Engine version

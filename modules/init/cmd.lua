@@ -5,7 +5,7 @@ console.add_command(
     "Send message",
     function (args)
         if SERVER then
-            SERVER:push_packet(protocol.ClientMsg.ChatMessage, args[1])
+            SERVER:push_packet(protocol.ClientMsg.ChatMessage, {args[1]})
         else
             console.log('Невозможно отправить сообщение')
         end

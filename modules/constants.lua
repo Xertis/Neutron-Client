@@ -14,3 +14,11 @@ COLORS = {
     white =  "[#FFFFFF]",
     gray =   "[#4d4d4d]"
 }
+
+PROTOCOL_VERSION = 3
+API_VERSION = 2
+PROTOCOL_STATES = {
+    Status = 0,
+    Login = 1,
+    Active = 2
+}

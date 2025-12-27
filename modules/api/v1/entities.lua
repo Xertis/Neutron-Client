@@ -26,7 +26,7 @@ entities.spawn = function(name, ...)
     local entity = original_spawn(name, ...)
     entity:despawn()
 
-    SERVER:push_packet(protocol.ClientMsg.EntitySpawnTry, entity:def_index(), {...})
+    SERVER:push_packet(protocol.ClientMsg.EntitySpawnAttempt, {def = entity:def_index(), args = {...}})
 
     return entity
 end

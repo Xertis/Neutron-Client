@@ -26,7 +26,7 @@ function on_chunk_present(x, z)
         return
     end
 
-    SERVER:push_packet(protocol.ClientMsg.RequestChunks, buffer)
+    SERVER:push_packet(protocol.ClientMsg.RequestChunks, {buffer})
     buffer = {x, z}
 end
 

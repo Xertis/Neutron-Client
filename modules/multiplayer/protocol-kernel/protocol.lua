@@ -1,21 +1,17 @@
+
 local bit_buffer = require "lib/files/bit_buffer"
-local compiler = require "multiplayer/protocol-kernel/compiler"
+local kernel = require "multiplayer/protocol-kernel/kernel"
 local protocol = {}
-protocol.data = json.parse(file.read("quartz:default_data/protocol/protocol.json"))
+
+logger.log("Initializing protocol...")
+kernel.__init()
+logger.log("Protocol initialized")
 
 function protocol.create_databuffer(bytes)
-    local buf = bit_buffer:new(bytes, protocol.data.order)
+    local buf = bit_buffer:new(bytes, "BE")
 
     function buf.ownDb:put_packet(packet)
         self:put_bytes(packet)
-    end
-
-    function buf.ownDb:get_packet()
-        local length = self:get_uint16()
-        local sliced = protocol.slice_table(self.bytes, self.pos, self.pos + length - 1)
-        self:set_position(self.pos + length)
-
-        return sliced, length
     end
 
     function buf.ownDb:set_be()
@@ -29,12 +25,11 @@ function protocol.create_databuffer(bytes)
     return buf
 end
 
-function protocol.build_packet(client_or_server, packet_type, ...)
+function protocol.build_packet(client_or_server, packet_type, data)
     local buffer = protocol.create_databuffer()
-    buffer:put_byte(packet_type - 1)
+    buffer:put_byte(packet_type)
 
-    local encoder = protocol[client_or_server .. "Parsers"][packet_type].encoder
-    local state, res = pcall(encoder, buffer, ...)
+    local state, res = pcall(kernel.write, buffer, client_or_server, kernel[client_or_server].ids[packet_type], data)
 
     if not state then
         logger.log("Packet encoding crash, additional information in server.log", 'E')
@@ -48,7 +43,7 @@ function protocol.build_packet(client_or_server, packet_type, ...)
         logger.log(table.tostring({client_or_server, packet_type}), 'E', true)
 
         logger.log("Data:", 'E', true)
-        logger.log(json.tostring(...), 'E', true)
+        logger.log(json.tostring(data), 'E', true)
         return {}
     end
     buffer:flush()
@@ -68,14 +63,9 @@ function protocol.parse_packet(client_or_server, data)
         buffer.receive_func = data
     end
 
-    local packet_type = buffer:get_byte() + 1
-    result.packet_type = packet_type
-    --print(packet_type)
-    local packet_parser_info = protocol[client_or_server .. "Parsers"][packet_type]
-    local decoder = packet_parser_info.decoder
-    local names = packet_parser_info.names
+    local packet_type = buffer:get_byte()
 
-    local state, res = pcall(decoder, buffer)
+    local state, res = pcall(kernel.read, buffer, client_or_server, kernel[client_or_server].ids[packet_type])
 
     if not state then
         logger.log("Packet parsing crash, additional information in server.log", 'E')
@@ -93,71 +83,16 @@ function protocol.parse_packet(client_or_server, data)
         return {}
     end
 
-    for indx, name in ipairs(names) do
-        result[name] = res[indx]
-    end
+    table.merge(result, res)
+    result.packet_type = packet_type
 
     return result
 end
 
-protocol.ClientMsg = {}
--- Перечисление сообщений сервера
-protocol.ServerMsg = {}
--- Перечисление статусов
-protocol.States = {}
--- Версия протокола
-protocol.Version = protocol.data.version
+protocol.ClientMsg = kernel.client.ids
+protocol.ServerMsg = kernel.server.ids
+protocol.States = PROTOCOL_STATES
 
---Парсеры
-protocol.serverParsers = {
-
-}
-protocol.clientParsers = {
-
-}
-
-local function create_parser(client_or_server, index, name_and_type)
-    local types = {}
-    local names = {}
-
-    for _, raw_type in ipairs(name_and_type) do
-        local parts = string.explode(':', raw_type)
-
-        local name = parts[1]
-        local type = parts[2]
-
-        table.insert(types, type)
-        table.insert(names, name)
-    end
-
-    local encoder = compiler.load(compiler.compile_encoder(types))
-    local decoder = compiler.load(compiler.compile_decoder(types))
-
-    protocol[client_or_server .. "Parsers"][index] = {
-        encoder = encoder,
-        decoder = decoder,
-        names = names
-    }
-end
-
--- Парсим из json типы пакетов сервера
-for index, value in ipairs(protocol.data.server) do
-    protocol.ServerMsg[index] = value[1]
-    protocol.ServerMsg[value[1]] = index
-
-    create_parser("server", index, table.sub(value, 2))
-end
--- Парсим из json типы пакетов клиента
-for index, value in ipairs(protocol.data.client) do
-    protocol.ClientMsg[index] = value[1] -- Имя типа пакета по индексу
-    protocol.ClientMsg[value[1]] = index -- Индекс по имени типа пакета
-
-    create_parser("client", index, table.sub(value, 2))
-end
--- Парсим из json статусы
-for index, value in ipairs(protocol.data.states) do
-    protocol.States[index] = value
-    protocol.States[value] = index
-end
+protocol.Version = PROTOCOL_VERSION
 
 return protocol

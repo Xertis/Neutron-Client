@@ -9,3 +9,5 @@ menu.Unexpect_Disconnected=Сервер внезапно отключился, �
 quartz.player_list=Список игроков
 quartz.cancel=Отмена
 quartz.done=Готово
+quartz.neutron_version=Версия ядра
+quartz.engine_version=Версия движка

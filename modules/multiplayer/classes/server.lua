@@ -14,7 +14,7 @@ function Server.new(active, network, address, port, name)
     self.address = address
     self.port = port
     self.id = max_id
-    self.state = 0
+    self.state = -1
     self.connecting = true
     self.tries = 0
     self.ping = {ping = 0, last_upd = 0}
@@ -48,9 +48,9 @@ function Server:set(key, val)
     self[key] = val
 end
 
-function Server:push_packet(...)
+function Server:push_packet(packet_type, data)
     local buffer = protocol.create_databuffer()
-    buffer:put_packet(protocol.build_packet("client", ...))
+    buffer:put_packet(protocol.build_packet("client", packet_type, data))
     self:queue_response(buffer.bytes)
 end
 

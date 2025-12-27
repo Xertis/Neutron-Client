@@ -6,8 +6,11 @@
 
     <label gravity="top-right" margin="0,0,30,0">@Server_info</label>
     <panel id='server_info' gravity="top-right" margin="0,15,0,0" size='480,506' color='0' max-length='506' scrollable='true'>
-        <label>@Version</label>
+        <label>@quartz.engine_version</label>
         <label id='version' multiline="true" color='#8C8C8C'>None</label>
+
+        <label margin="0,20,0,0">@quartz.neutron_version</label>
+        <label id='neutron_version' multiline="true" color='#8C8C8C'>None</label>
 
         <label margin="0,20,0,0">@Friends_online</label>
         <label id='friends' markup="md" multiline="true" color='#8C8C8C'>None</label>

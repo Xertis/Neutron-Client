@@ -29,7 +29,12 @@ function module.create_env(pack, env_name)
 
             data[key] = value
 
-            SERVER:push_packet(protocol.ClientMsg.PackEnv, pack, env_name, key, value)
+            SERVER:push_packet(protocol.ClientMsg.PackEnv, {
+                pack = pack,
+                env = env_name,
+                key = key,
+                value = value
+            })
 
         end,
     })

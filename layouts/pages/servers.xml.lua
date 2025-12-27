@@ -62,7 +62,8 @@ function handlers.on_change_info(server, packet)
         max = packet.max,
         online = packet.online,
         description = packet.description,
-        version = packet.version,
+        version = packet.engine_version,
+        neutron_version = packet.neutron_version,
         friends_online = friends,
         server = server
     }
@@ -88,6 +89,7 @@ function get_info(id)
     info.friends_online = info.friends_online or {}
 
     document.version.text = info.version or "None"
+    document.neutron_version.text = info.neutron_version or "None"
     document.description.text = info.description or "None"
     document.friends.text = table.concat(info.friends_online, ', ')
 
@@ -169,8 +171,19 @@ function connect(id)
             local major, minor = external_app.get_version()
             local engine_version = string.format("%s.%s.0", major, minor)
 
-            buffer:put_packet(protocol.build_packet("client", protocol.ClientMsg.HandShake, engine_version, "Neutron", protocol.data.version, {}, protocol.States.Login))
-            buffer:put_packet(protocol.build_packet("client", protocol.ClientMsg.JoinGame, CONFIG.Account.name))
+            buffer:put_packet(protocol.build_packet("client", protocol.ClientMsg.HandShake, {
+                protocol_reference = "Neutron",
+                protocol_version = protocol.Version,
+
+                engine_version = engine_version,
+                api_version = API_VERSION,
+                friends_list = {},
+                next_state = protocol.States.Login
+            }))
+            buffer:put_packet(protocol.build_packet("client", protocol.ClientMsg.JoinGame, {
+                username = CONFIG.Account.name,
+                identity = CONFIG.Account.name
+            }))
             _server.network:send(buffer.bytes)
         end
     })
