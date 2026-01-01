@@ -35,7 +35,8 @@ handlers[protocol.ServerMsg.Disconnect] = function (server, packet)
     menu:reset()
     menu.page = "quartz_connection"
     local document = Document.new("quartz:pages/quartz_connection")
-    document.info.text = packet.reason
+
+    document.info.text = packet.reason or "Unexpected disconnection"
     CLIENT:disconnect()
 end
 

@@ -35,6 +35,24 @@ ServerPipe:add_middleware(function(server)
     return server
 end)
 
+-- Отправляем свойства игрока
+ServerPipe:add_middleware(function(server)
+    if  CLIENT_PLAYER.changed_flags.infinite_items or
+        CLIENT_PLAYER.changed_flags.instant_destruction or
+        CLIENT_PLAYER.changed_flags.interaction_distance
+    then
+        server:push_packet(protocol.ClientMsg.PlayerFeatures, {
+            infinite_items = CLIENT_PLAYER.infinite_items,
+            instant_destruction = CLIENT_PLAYER.instant_destruction,
+            interaction_distance = CLIENT_PLAYER.interaction_distance
+        })
+        CLIENT_PLAYER.changed_flags.infinite_items = false
+        CLIENT_PLAYER.changed_flags.instant_destruction = false
+        CLIENT_PLAYER.changed_flags.interaction_distance = false
+    end
+    return server
+end)
+
 --Отправляем наши блоки
 ServerPipe:add_middleware(function(server)
     server:queue_response(sandbox.get_bytes())

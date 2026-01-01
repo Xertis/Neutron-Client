@@ -1,4 +1,4 @@
-<container id="serverdata_%{id}" ondoubleclick="connect(%{id})" size="400,80" color="#0F1E2DB2" hover-color="#162B3399" onclick="get_info(%{id})">
+<container id="serverdata_%{id}" ondoubleclick="connect(%{id})" size="400,80" color="#0F1E2DB2" hover-color="#162B3399" onclick="get_server_info(%{id})">
 
     <image id="servericon_%{id}" src='%{server_favicon}'
         size='64'

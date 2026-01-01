@@ -82,7 +82,7 @@ function handlers.on_disconnect(server)
     document["serverstatus_" .. server.id].text = COLORS.red .. "offline"
 end
 
-function get_info(id)
+function get_server_info(id)
     local info = servers_infos[id]
     if not info then return end
 

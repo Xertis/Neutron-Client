@@ -53,6 +53,9 @@ function on_world_tick()
         CLIENT_PLAYER:set_cheats(CACHED_DATA.cheats, false)
         CLIENT_PLAYER:set_inventory(CACHED_DATA.inv, false)
         CLIENT_PLAYER:set_slot(CACHED_DATA.slot, false)
+        CLIENT_PLAYER:set_infinite_items(CACHED_DATA.infinite_items, false)
+        CLIENT_PLAYER:set_instant_destruction(CACHED_DATA.instant_destruction, false)
+        CLIENT_PLAYER:set_interaction_distance(CACHED_DATA.interaction_distance, false)
     end
 
     if external_app.get_setting("chunks.load-distance") > CHUNK_LOADING_DISTANCE then

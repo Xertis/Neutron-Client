@@ -67,7 +67,7 @@ local function call_component(entity, fields)
 end
 
 local function update(cuid, def, dirty)
-    local std_fields = dirty.standart_fields or {}
+    local std_fields = dirty.standard_fields or {}
     local entity = entities.get(cuid)
     if not entity then return end
 
@@ -144,7 +144,7 @@ function module.__update_player__(pid, dirty)
 end
 
 function module.__emit__(uid, def, dirty)
-    local std_fields = dirty.standart_fields or {}
+    local std_fields = dirty.standard_fields or {}
 
     if not entities_uids[uid] then
         local entity_name = entities.def_name(def)

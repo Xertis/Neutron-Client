@@ -179,6 +179,7 @@ function module.load(code)
         bson = bson,
         bincode = bincode,
         edd = edd,
+        print = print,
 
         MAX_UINT16 = 65535,
         MIN_UINT16 = 0,
