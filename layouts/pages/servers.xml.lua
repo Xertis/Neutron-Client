@@ -62,8 +62,9 @@ function handlers.on_change_info(server, packet)
         max = packet.max,
         online = packet.online,
         description = packet.description,
-        version = packet.engine_version,
+        engine_version = packet.engine_version,
         neutron_version = packet.neutron_version,
+        protocol_version = packet.protocol_version,
         friends_online = friends,
         server = server
     }
@@ -88,8 +89,14 @@ function get_server_info(id)
 
     info.friends_online = info.friends_online or {}
 
-    document.version.text = info.version or "None"
+    document.engine_version.text = info.engine_version or "None"
     document.neutron_version.text = info.neutron_version or "None"
+    document.protocol_version.text = info.protocol_version or "None"
+
+    if info.protocol_version ~= PROTOCOL_VERSION then
+        document.protocol_version.color = {255, 0, 0, 255}
+    end
+
     document.description.text = info.description or "None"
     document.friends.text = table.concat(info.friends_online, ', ')
 
@@ -161,6 +168,11 @@ function connect(id)
     if not info then return end
 
     local server = info.server
+
+    if info.protocol_version ~= PROTOCOL_VERSION then
+        gui.alert(gui.str("quartz.different_protocols", "quartz"))
+        return
+    end
 
     CLIENT:connect(server.address, server.port, server.name, protocol.States.Login, id, {
         on_connect = function (_server)
