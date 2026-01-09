@@ -149,9 +149,9 @@ handlers[protocol.ServerMsg.PlayerListAdd] = function (server, packet)
 end
 
 handlers[ protocol.ServerMsg.PlayerMoved ] = function (server, packet)
-    local player = PLAYER_LIST[packet.pid]
+    local player_obj = PLAYER_LIST[packet.pid]
 
-    if not player then
+    if not player_obj then
         TEMP_PLAYERS[packet.pid] = packet.data
         return
     end
@@ -161,19 +161,19 @@ handlers[ protocol.ServerMsg.PlayerMoved ] = function (server, packet)
     local data = packet.data
 
     if data.pos and data.compressed then
-        local x, y, z = player.pos.x, player.pos.y, player.pos.z
-        player:set_pos({
+        local x, y, z = player_obj.pos.x, player_obj.pos.y, player_obj.pos.z
+        player_obj:set_pos({
             x = x + data.pos.x,
             y = y + data.pos.y,
             z = z + data.pos.z
         })
     elseif data.pos then
-        player:set_pos(data.pos)
+        player_obj:set_pos(data.pos)
     end
 
-    player:set_hand_item(data.hand_item)
-    player:set_rot(data.rot)
-    player:set_cheats(data.cheats)
+    player_obj:set_hand_item(data.hand_item)
+    player_obj:set_rot(data.rot)
+    player_obj:set_cheats(data.cheats)
 end
 
 handlers[ protocol.ServerMsg.KeepAlive ] = function (server, packet)

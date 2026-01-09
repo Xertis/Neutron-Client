@@ -17,7 +17,7 @@ function on_world_open()
 end
 
 function on_chunk_present(x, z)
-    if #buffer < (core.get_setting("chunks.load-distance")^2) / 2 then
+    if #buffer < (external_app.get_setting("chunks.load-distance")^2) / 2 then
         if not loaded_chunks[x .. '/' .. z] then
             table.insert(buffer, x)
             table.insert(buffer, z)

@@ -197,8 +197,11 @@ function Player:set_cheats(cheats, set_flag)
     if CLIENT_PLAYER.pid ~= self.pid then
         if self.cheats.noclip == false then
             cheats = {noclip = true, flight = true}
-
+            player.set_flight(self.pid, true)
+            player.set_noclip(self.pid, true)
         end
+
+        return
     end
 
     self.cheats = {noclip = cheats.noclip, flight = cheats.flight}
