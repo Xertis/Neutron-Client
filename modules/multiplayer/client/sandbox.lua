@@ -79,7 +79,7 @@ function module.on_interact(blockid, x, y, z)
         local abs_z = z - CLIENT_PLAYER.region.z * 32
         buffer:put_bytes(protocol.build_packet(
             "client",
-            protocol.ClientMsg.BlockInteract,
+            protocol.ClientMsg.BlockRegionInteract,
             {
                 pos = { x = abs_x, y = y, z = abs_z },
             }
