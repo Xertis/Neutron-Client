@@ -20,12 +20,12 @@ function on_open()
             players_online = ""
         })
 
-        CLIENT:connect(server.address, server.port, server.name, nil, id, {
-            on_change_info = handlers.on_change_info
+        CLIENT:connect(server.address, server.port, nil, id, {
+            on_get_info = handlers.on_get_info
         })
     end
 
-    events.emit("quartz:server_list_opened", document)
+    events.emit("client:server_list_opened", document)
 end
 
 function refresh()
@@ -40,13 +40,13 @@ function refresh()
             players_online = ""
         })
 
-        CLIENT:connect(server.address, server.port, server.name, nil, id, {
-            on_change_info = handlers.on_change_info
+        CLIENT:connect(server.address, server.port, nil, id, {
+            on_get_info = handlers.on_get_info
         })
     end
 end
 
-function handlers.on_change_info(server, packet)
+function handlers.on_get_info(server, packet)
     assets.load_texture(packet.favicon, server.name .. ".icon")
 
     local friends = {}
@@ -170,13 +170,13 @@ function connect(id)
     local server = info.server
 
     if info.protocol_version ~= PROTOCOL_VERSION then
-        gui.alert(gui.str("quartz.different_protocols", "quartz"))
+        gui.alert(gui.str("client.different_protocols", "client"))
         return
     end
 
-    CLIENT:connect(server.address, server.port, server.name, protocol.States.Login, id, {
+    CLIENT:connect(server.address, server.port, protocol.States.Login, id, {
         on_connect = function (_server)
-            events.emit("quartz:server_connect", _server)
+            events.emit("client:server_connect", _server)
             _server.meta.max_online = info.max
             local buffer = protocol.create_databuffer()
 
@@ -198,19 +198,19 @@ function connect(id)
                 identity = CONFIG.Account.name
             }
 
-            events.emit("quartz:join_game", data)
+            events.emit("client:join_game", data)
 
             buffer:put_packet(protocol.build_packet("client", protocol.ClientMsg.JoinGame, data))
             _server.network:send(buffer.bytes)
         end
     })
 
-    menu.page = "quartz_connection"
+    menu.page = "client_connection"
 end
 
 function to_config()
-    menu.page="quartz_config"
-    events.emit("quartz:config_opened", document)
+    menu.page="client_config"
+    events.emit("client:config_opened", document)
 end
 
 function main_menu()

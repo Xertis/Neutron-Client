@@ -5,12 +5,11 @@ local Server = {}
 local max_id = 0
 Server.__index = Server
 
-function Server.new(active, network, address, port, name)
+function Server.new(active, network, address, port)
     local self = setmetatable({}, Server)
 
     self.active = false or active
     self.network = network
-    self.name = name
     self.address = address
     self.port = port
     self.id = max_id
@@ -22,7 +21,7 @@ function Server.new(active, network, address, port, name)
 
     self.handlers = {
         on_connect = nil,
-        on_change_info = nil,
+        on_get_info = nil,
         on_join = nil,
         on_leave = nil,
         on_disconnect = nil

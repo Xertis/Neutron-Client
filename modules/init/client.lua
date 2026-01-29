@@ -1,56 +1,51 @@
--- Инициализируем stdmin
-require "quartz:std/stdmin"
+local function prepare_app(app)
+    local protect_app = {}
 
-initializator = {}
+    for key, val in pairs(app) do
+        protect_app[key] = function (...)
+            if parse_path(debug.getinfo(2).source) == "client" then
+                return val(...)
+            end
+        end
+    end
 
-local default_config = {
-    Account = {
-        name = "Test",
-        friends = {}
-    },
-    Servers = {
-    },
-    Pinned_packs = {
-    }
-}
+    protect_app.reset_content = function ()
+        local unresetable = {"client"}
 
--- Инициализируем конфиг
+        if LAUNCHER_PACK then
+            unresetable = {"client", LAUNCHER_PACK}
+        end
 
-if not file.exists(CONFIG_PATH) then
-    file.write(CONFIG_PATH, json.tostring(default_config))
+        app.reset_content(unresetable)
+    end
+
+    _G["external_app"] = protect_app
 end
 
-CONFIG = table.merge(json.parse(file.read(CONFIG_PATH)), default_config)
+return function(app, after_init)
+    after_init = after_init or function () end
+    prepare_app(app)
 
--- Инициализацация паков
-function initializator.init_packs()
-    table.filter(CONTENT_PACKS, function ()
-        return false
+    require "client:constants"
+    require "client:globals"
+    require "client:std/stdboot"
+    require "client:std/stdmin"
+    local Client = require "client:multiplayer/client/client"
+
+    local client = Client.new()
+
+    _G["/$p"] = table.copy(package.loaded)
+
+    after_init()
+
+    local function main()
+        while true do
+            client:tick()
+            external_app.tick()
+        end
+    end
+
+    xpcall(main, function (error)
+        print(debug.traceback(error, 2))
     end)
-
-    external_app.reset_content()
-    table.insert(CONTENT_PACKS, PACK_ID)
-
-    for _, pack in ipairs(pack.get_available()) do
-        if table.has(CONFIG.Pinned_packs, pack) then
-            table.insert_unique(CONTENT_PACKS, pack)
-        end
-    end
-
-    external_app.config_packs(CONTENT_PACKS)
-    external_app.load_content()
 end
-
--- Инициализация скриптов
-function initializator.init_pack_scripts()
-    local paths = file.list_all_res("scripts/client/")
-
-    for _, path in ipairs(paths) do
-        if file.name(path) == "main.lua" then
-            __load_script(path)
-        end
-    end
-end
-
-initializator.init_packs()
-initializator.init_pack_scripts()

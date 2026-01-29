@@ -6,13 +6,13 @@
 
     <label gravity="top-right" margin="0,0,30,0">@Server_info</label>
     <panel id='server_info' gravity="top-right" margin="0,15,0,0" size='480,506' color='0' max-length='506' scrollable='true'>
-        <label>@quartz.engine_version</label>
+        <label>@client.engine_version</label>
         <label id='engine_version' multiline="true" color='#8C8C8C'>None</label>
 
-        <label margin="0,20,0,0">@quartz.neutron_version</label>
+        <label margin="0,20,0,0">@client.neutron_version</label>
         <label id='neutron_version' multiline="true" color='#8C8C8C'>None</label>
 
-        <label margin="0,20,0,0">@quartz.protocol_version</label>
+        <label margin="0,20,0,0">@client.protocol_version</label>
         <label id='protocol_version' multiline="true" color='#8C8C8C'>None</label>
 
         <label margin="0,20,0,0">@Friends_online</label>
@@ -25,7 +25,7 @@
     <image size="5,580" src='gui/line' gravity="center-center"/>
 
     <button pos='83,525' size='392,40' onclick='main_menu()'>@Back</button>
-    <button gravity="bottom-right" margin="0,0,15,15" size='460,40' onclick='menu.page="quartz_content"'>@Content</button>
+    <button gravity="bottom-right" margin="0,0,15,15" size='460,40' onclick='menu.page="client_content"'>@Content</button>
     <image id="config" onclick='to_config()' interactive='true' src='gui/settings_icon' 
         size='36'
         color='#FFFFFF50' hover-color='#FFFFFF10'

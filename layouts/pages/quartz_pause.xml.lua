@@ -80,7 +80,7 @@ function on_open()
     update()
     local main_container = document.player_list.parent
 
-    events.emit("quartz:pause_opened", document)
+    events.emit("client:pause_opened", document)
 
     main_container:setInterval(700, function ()
         for _, player in pairs(PLAYER_LIST) do

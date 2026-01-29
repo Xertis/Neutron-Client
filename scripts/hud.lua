@@ -3,5 +3,5 @@ function on_hud_open()
 end
 
 function on_hud_render()
-    events.emit("quartz:hud_render")
+    events.emit("client:hud_render")
 end

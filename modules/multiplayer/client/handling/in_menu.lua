@@ -28,13 +28,13 @@ end
 
 handlers[protocol.ServerMsg.StatusResponse] = function (server, packet)
     server.meta.max_online = packet.max
-    server.handlers.on_change_info(server, packet)
+    server.handlers.on_get_info(server, packet)
 end
 
 handlers[protocol.ServerMsg.Disconnect] = function (server, packet)
     menu:reset()
-    menu.page = "quartz_connection"
-    local document = Document.new("quartz:pages/quartz_connection")
+    menu.page = "client_connection"
+    local document = Document.new("client:pages/client_connection")
 
     document.info.text = packet.reason or "Unexpected disconnection"
     CLIENT:disconnect()
@@ -85,7 +85,6 @@ handlers[protocol.ServerMsg.JoinSuccess] = function (server, packet)
     external_app.config_packs(CONTENT_PACKS)
 
     external_app.new_world("", "41530140565755", PACK_ID .. ":void", packet.pid)
-    CLIENT.pid = packet.pid
 
     CHUNK_LOADING_DISTANCE = packet.chunks_loading_distance
 
@@ -93,7 +92,7 @@ handlers[protocol.ServerMsg.JoinSuccess] = function (server, packet)
         rules.set(rule[1], rule[2])
     end
 
-    CLIENT_PLAYER = Player.new(hud.get_player(), CONFIG.Account.name)
+    CLIENT_PLAYER = Player.new(packet.pid, CONFIG.Account.name)
 end
 
 return handlers

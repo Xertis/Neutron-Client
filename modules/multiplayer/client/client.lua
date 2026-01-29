@@ -13,15 +13,14 @@ function Client.new()
     self.servers = {}
     self.socket = nil
     self.main_server = nil
-    self.pid = 0
 
     CLIENT = self
 
     return self
 end
 
-function Client:connect(address, port, name, state, id, handlers)
-    local server = Server.new(false, nil, address, port, name)
+function Client:connect(address, port, state, id, handlers)
+    local server = Server.new(false, nil, address, port)
     self.socket = socketlib.connect(address, tonumber(port), function (socket)
         local network = Network.new(socket)
         server:set("network", network)
@@ -38,7 +37,10 @@ function Client:connect(address, port, name, state, id, handlers)
 
     server.handlers = handlers
     server.network = {}
-    server.id = id
+
+    if id then
+        server.id = id
+    end
 
     table.insert(self.servers, server)
 
@@ -81,20 +83,21 @@ end
 function Client:tick()
     for index, server in ipairs(self.servers) do
         local socket = server.network.socket
-        if not ((socket and socket:is_alive()) or (server.connecting and not self.main_server) or (self.main_server == server)) then
+        if not ((socket and socket:is_alive()) or (server.connecting and not SERVER) or (SERVER == server)) then
             if server.active then
                 server.active = false
             end
 
             local global_server = SERVER or {}
+
+            if socket and socket:is_alive() then
+                socket:close()
+            end
+
             if server.id == global_server.id then
                 if world.is_open() then
                     leave_to_menu()
                 end
-            end
-
-            if socket and socket:is_alive() then
-                socket:close()
             end
 
             if server.handlers.on_disconnect then

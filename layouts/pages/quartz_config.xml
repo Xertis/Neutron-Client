@@ -8,6 +8,6 @@
     <button pos='15,195' size='260,30' onclick='add_server()'>@Server_add</button>
 
     <button pos='15,525' size='227,40' onclick='finish()'>@menu.Apply</button>
-    <button pos='257,525' size='227,40' onclick='menu:back()'>@quartz.cancel</button>
+    <button pos='257,525' size='227,40' onclick='menu:back()'>@client.cancel</button>
 </container>
 

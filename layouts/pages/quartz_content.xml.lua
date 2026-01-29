@@ -166,7 +166,7 @@ function place_pack(panel, packinfo, callback, position_func)
     packinfo.callback = callback
     packinfo.position_func = position_func or function () end
 
-    panel:add(gui.template("quartz_pack", packinfo))
+    panel:add(gui.template("client_pack", packinfo))
     if not callback or packinfo.has_indices then
         document["pack_"..packinfo.id].enabled = false
     end

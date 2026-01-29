@@ -5,8 +5,9 @@ local sandbox = require "api/v2/sandbox"
 local rpc = require "api/v2/rpc"
 local bson = require "lib/files/bson"
 local inv_dat = require "api/v2/inv_dat"
+local laucnher_api = require "api/v2/launcher/api"
 
-local api = {
+local client_api = {
     events = events,
     rpc = rpc,
     bson = bson,
@@ -16,4 +17,8 @@ local api = {
     inventory_data = inv_dat,
 }
 
-return {client = api}
+
+return {
+    client = client_api,
+    launcher = laucnher_api
+}

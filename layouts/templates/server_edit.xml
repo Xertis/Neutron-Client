@@ -6,5 +6,5 @@
     <label pos="15,0">IP</label>
     <textbox pos='15,150' size='260,30' sub-consumer="edit_server_ip" id='ip' hint='IP'>%{ip}</textbox>
 </panel>
-<button gravity="bottom-center" size="484,40" onclick='finish_edit()'>@quartz.done</button>
+<button gravity="bottom-center" size="484,40" onclick='finish_edit()'>@client.done</button>
 </container>

@@ -25,7 +25,7 @@ function module.cancel_task(job_name)
     end
 end
 
-events.on("quartz:hud_render", function ()
+events.on("client:hud_render", function ()
     local cur_time = time.uptime()
     for i=#tasks, 1, -1 do
         local task = tasks[i]
