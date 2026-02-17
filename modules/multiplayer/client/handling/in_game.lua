@@ -12,7 +12,7 @@ local api_wraps = require "api/v2/wraps"
 local handlers = {}
 
 handlers[protocol.ServerMsg.Disconnect] = function (server, packet)
-    leave_to_menu(packet.reason)
+    SHELL.module.handlers.game.on_disconnect(server, packet)
     CLIENT_PLAYER:set_slot(packet.slot, false)
     CLIENT:disconnect()
 end

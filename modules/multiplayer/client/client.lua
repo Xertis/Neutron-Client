@@ -1,5 +1,4 @@
 local Network = require "lib/network/network"
-local socketlib = require "lib/network/socketlib"
 local Server = require "multiplayer/classes/server"
 local protocol = require "multiplayer/protocol-kernel/protocol"
 local Client_pipe = require "multiplayer/client/client_pipe"
@@ -13,32 +12,38 @@ function Client.new()
     self.servers = {}
     self.socket = nil
     self.main_server = nil
-    self.pid = 0
 
     CLIENT = self
 
     return self
 end
 
-function Client:connect(address, port, name, state, id, handlers)
+function Client:connect(address, port, name, state, id, meta)
     local server = Server.new(false, nil, address, port, name)
-    self.socket = socketlib.connect(address, tonumber(port), function (socket)
+    self.socket = network.tcp_connect(address, tonumber(port), function (socket)
+
         local network = Network.new(socket)
         server:set("network", network)
         server.connecting = false
         server.state = state or -1
         socket:set_nodelay(true)
 
-        if handlers.on_connect then
-            handlers.on_connect(server)
+        if meta.on_connect then
+            meta.on_connect(server)
         end
-    end, function ()
+    end, function (_, err)
         server.connecting = false
+        if meta.on_disconnect then
+            meta.on_disconnect(server, err)
+        end
     end)
 
-    server.handlers = handlers
+    table.merge(server.meta, meta)
     server.network = {}
-    server.id = id
+
+    if id then
+        server.id = id
+    end
 
     table.insert(self.servers, server)
 
@@ -56,16 +61,13 @@ function Client:stop()
 end
 
 function Client:disconnect()
-    if world.is_open() then
-        external_app.close_world()
-    end
-
     for i=#self.servers, 1, -1 do
         local server = self.servers[i]
         local socket = server.network.socket
         server:push_packet(protocol.ClientMsg.Disconnect, {})
         if socket and socket:is_alive() then
             if server.active then
+                SHELL.module.handlers.game.on_disconnect(server)
                 server.active = false
             end
 
@@ -79,26 +81,19 @@ function Client:disconnect()
 end
 
 function Client:tick()
+    if SERVER and not SERVER.active then SERVER = nil end
+
     for index, server in ipairs(self.servers) do
         local socket = server.network.socket
-        if not ((socket and socket:is_alive()) or (server.connecting and not self.main_server) or (self.main_server == server)) then
-            if server.active then
-                server.active = false
-            end
 
-            local global_server = SERVER or {}
-            if server.id == global_server.id then
-                if world.is_open() then
-                    leave_to_menu()
-                end
+        if not ((socket ~= nil and socket:is_alive()) or (server.connecting and not SERVER)) then
+            if server.active then
+                SHELL.module.handlers.game.on_disconnect(server)
+                server.active = false
             end
 
             if socket and socket:is_alive() then
                 socket:close()
-            end
-
-            if server.handlers.on_disconnect then
-                server.handlers.on_disconnect(server)
             end
 
             table.remove_value(self.servers, server)

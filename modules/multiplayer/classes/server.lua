@@ -10,19 +10,20 @@ function Server.new(active, network, address, port, name)
 
     self.active = false or active
     self.network = network
-    self.name = name
     self.address = address
     self.port = port
+    self.name = name
     self.id = max_id
     self.state = -1
     self.connecting = true
     self.tries = 0
     self.ping = {ping = 0, last_upd = 0}
     self.meta = {max_online = 0}
+    self.ip = address .. ':' .. port
 
     self.handlers = {
         on_connect = nil,
-        on_change_info = nil,
+        on_status = nil,
         on_join = nil,
         on_leave = nil,
         on_disconnect = nil

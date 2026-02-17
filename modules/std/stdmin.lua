@@ -3,7 +3,7 @@ local data_buffer = require "lib/files/bit_buffer"
 _G['$Neutron'] = "client"
 _G['$Multiplayer'] = {
     side = "client",
-    pack_id = "quartz",
+    pack_id = "client",
     api_references = {
         Neutron = {"v1", "v2", latest = "v2"}
     }
@@ -164,6 +164,10 @@ function string.soft_space_split(str)
     end
 
     return result
+end
+
+function string.split_ip(ip)
+    return unpack(string.split(ip, ':'))
 end
 
 

@@ -1,10 +1,9 @@
-CONTENT_PACKS = {}
-CACHED_DATA = {over = false}
+CONTENT_PACKS = { PACK_ID }
+CACHED_DATA = { over = false }
 
 PLAYER_LIST = {}
 TEMP_PLAYERS = {}
 CLIENT_PLAYER = nil
 CLIENT = nil
+CLIENT_PID = nil
 SERVER = nil
-
-update_config = function() file.write(CONFIG_PATH, json.tostring(CONFIG, true)) end

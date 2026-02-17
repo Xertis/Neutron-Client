@@ -1,7 +1,5 @@
-CONFIG = {}
-
-PACK_ID = "quartz"
-CONFIG_PATH = pack.shared_file(PACK_ID, "config.json")
+PACK_ID = "client"
+SHELL = nil
 
 CHUNK_LOADING_DISTANCE = 0
 

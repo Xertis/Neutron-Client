@@ -1,56 +1,70 @@
--- Инициализируем stdmin
-require "quartz:std/stdmin"
+local function prepare_app(app)
+    local protect_app = {}
 
-initializator = {}
+    for key, val in pairs(app) do
+        protect_app[key] = function(...)
+            if parse_path(debug.getinfo(2).source) == "client" then
+                return val(...)
+            end
+        end
+    end
 
-local default_config = {
-    Account = {
-        name = "Test",
-        friends = {}
-    },
-    Servers = {
-    },
-    Pinned_packs = {
-    }
-}
+    protect_app.reset_content = function()
+        local unresetable = { "client" }
 
--- Инициализируем конфиг
+        if SHELL then
+            unresetable = { "client", SHELL.prefix }
+        end
 
-if not file.exists(CONFIG_PATH) then
-    file.write(CONFIG_PATH, json.tostring(default_config))
+        app.reset_content(unresetable)
+    end
+
+    _G["external_app"] = protect_app
 end
 
-CONFIG = table.merge(json.parse(file.read(CONFIG_PATH)), default_config)
+local function prepare_pause(pause_menu)
+    gui_util.add_page_dispatcher(function(name, args)
+        if name == "pause" then
+            name = pause_menu
+        end
 
--- Инициализацация паков
-function initializator.init_packs()
-    table.filter(CONTENT_PACKS, function ()
-        return false
+        return name, args
     end)
+end
 
-    external_app.reset_content()
-    table.insert(CONTENT_PACKS, PACK_ID)
+return function(app)
+    local post_init = SHELL.module.init or function() end
+    prepare_app(app)
+    prepare_pause(SHELL.config.layouts.pause)
 
-    for _, pack in ipairs(pack.get_available()) do
-        if table.has(CONFIG.Pinned_packs, pack) then
-            table.insert_unique(CONTENT_PACKS, pack)
+    table.insert_unique(CONTENT_PACKS, SHELL.prefix)
+
+    local Client = require "client:multiplayer/client/client"
+
+    local client = Client.new()
+
+    _G["/$p"] = table.copy(package.loaded)
+
+    session.reset_entry("neutron-client-env")
+    local env_meta = {
+        __index = PACK_ENV,
+        __newindex = function(t, key, value)
+            rawset(PACK_ENV, key, value)
+        end
+    }
+
+    setmetatable(session.get_entry("neutron-client-env"), env_meta)
+
+    post_init()
+
+    local function main()
+        while true do
+            client:tick()
+            external_app.tick()
         end
     end
 
-    external_app.config_packs(CONTENT_PACKS)
-    external_app.load_content()
+    xpcall(main, function(error)
+        print(debug.traceback(error, 2))
+    end)
 end
-
--- Инициализация скриптов
-function initializator.init_pack_scripts()
-    local paths = file.list_all_res("scripts/client/")
-
-    for _, path in ipairs(paths) do
-        if file.name(path) == "main.lua" then
-            __load_script(path)
-        end
-    end
-end
-
-initializator.init_packs()
-initializator.init_pack_scripts()

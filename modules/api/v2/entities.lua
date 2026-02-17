@@ -1,5 +1,4 @@
 local protocol = require "multiplayer/protocol-kernel/protocol"
-local timer = require "lib/timer"
 
 local module = {}
 local entities_uids = {}
@@ -119,8 +118,8 @@ local function update(cuid, def, dirty)
     local rigidbody = entity.rigidbody
 
     local controller = nil
-    if entity:has_component("quartz:controller") then
-        controller = entity:require_component("quartz:controller")
+    if entity:has_component("client:controller") then
+        controller = entity:require_component("client:controller")
     end
 
     if std_fields.tsf_pos and controller then controller.set_pos(std_fields.tsf_pos) end
@@ -158,9 +157,9 @@ function module.__emit__(uid, def, dirty)
         local chunk_env = {entity = new_entity}
         setmetatable(chunk_env, {__index = _G})
 
-        local chunk = __load_script("quartz:modules/components/controller.lua", true, chunk_env)
+        local chunk = __load_script("client:modules/components/controller.lua", true, chunk_env)
 
-        new_entity.components["quartz:controller"] = chunk
+        new_entity.components["client:controller"] = chunk
     end
 
     local cuid = entities_uids[uid]
