@@ -18,10 +18,10 @@ function Player.new(pid, name, pos, rot, cheats)
     self.invid = player.get_inventory(pid)
     self.inv = {}
     self.slot = 0
-    self.region = {x = 0, z = 0}
-    self.pos = pos or {x = 0, y = -10, z = 0}
-    self.rot = rot or {x = 0, y = 0, z = 0}
-    self.cheats = cheats or {noclip = false, flight = false}
+    self.region = { x = 0, z = 0 }
+    self.pos = pos or { x = 0, y = -10, z = 0 }
+    self.rot = rot or { x = 0, y = 0, z = 0 }
+    self.cheats = cheats or { noclip = false, flight = false }
     self.active = true
     self.hand_item = 0
     self.infinite_items = player.is_infinite_items(pid)
@@ -55,7 +55,8 @@ function Player.new(pid, name, pos, rot, cheats)
 end
 
 function Player:is_chunk_loaded()
-    return is_chunk_loaded(self.pos.x, self.pos.z)
+    local x, _, z = player.get_pos(self.pid)
+    return is_chunk_loaded(x, z)
 end
 
 function Player:apply_pending_updates()
@@ -155,7 +156,7 @@ function Player:set_pos(pos, set_flag)
 
     local cur_loaded = self:is_chunk_loaded()
 
-    self.pos = {x = pos.x, y = pos.y, z = pos.z}
+    self.pos = { x = pos.x, y = pos.y, z = pos.z }
 
     self.region = {
         x = math.floor(pos.x / 32),
@@ -180,7 +181,7 @@ end
 function Player:set_rot(rot, set_flag)
     if rot == nil then return end
 
-    self.rot = {x = rot.x, y = rot.y, z = rot.z}
+    self.rot = { x = rot.x, y = rot.y, z = rot.z }
 
     if self:is_chunk_loaded() then
         player.set_rot(self.pid, rot.x, rot.y, rot.z)
@@ -196,7 +197,7 @@ function Player:set_cheats(cheats, set_flag)
 
     if CLIENT_PLAYER.pid ~= self.pid then
         if self.cheats.noclip == false then
-            cheats = {noclip = true, flight = true}
+            cheats = { noclip = true, flight = true }
             player.set_flight(self.pid, true)
             player.set_noclip(self.pid, true)
         end
@@ -204,10 +205,9 @@ function Player:set_cheats(cheats, set_flag)
         return
     end
 
-    self.cheats = {noclip = cheats.noclip, flight = cheats.flight}
+    self.cheats = { noclip = cheats.noclip, flight = cheats.flight }
 
     if self:is_chunk_loaded() then
-
         player.set_flight(self.pid, cheats.flight)
         player.set_noclip(self.pid, cheats.noclip)
         if set_flag then self.changed_flags.cheats = true end
@@ -239,7 +239,6 @@ function Player:set_hand_item(hand_item)
 
     inventory.set(invid, slot, hand_item, 1)
 end
-
 
 function Player:tick()
     local cur_loaded = self:is_chunk_loaded()
@@ -293,13 +292,12 @@ function Player:__check_interaction_distance()
     end
 end
 
-
 function Player:__check_pos()
     if not CACHED_DATA.over then return end
 
     local x, y, z = player.get_pos(self.pid)
     if math.euclidian3D(self.pos.x, self.pos.y, self.pos.z, x, y, z) > 0.05 then
-        self.pos = {x = x, y = y, z = z}
+        self.pos = { x = x, y = y, z = z }
         self.changed_flags.pos = true
     end
 
@@ -307,7 +305,7 @@ function Player:__check_pos()
     local cur_region_z = math.floor(z / 32)
 
     if self.region.x ~= cur_region_x or self.region.z ~= cur_region_z then
-        self.region = {x = cur_region_x, z = cur_region_z}
+        self.region = { x = cur_region_x, z = cur_region_z }
         self.changed_flags.region = true
     end
 end
@@ -316,7 +314,7 @@ function Player:__check_rot()
     local x, y, z = player.get_rot(self.pid)
 
     if self.rot.x ~= x or self.rot.y ~= y or self.rot.z ~= z then
-        self.rot = {x = x, y = y, z = z}
+        self.rot = { x = x, y = y, z = z }
         self.changed_flags.rot = true
     end
 end
@@ -325,7 +323,7 @@ function Player:__check_cheats()
     local noclip, flight = player.is_noclip(self.pid), player.is_flight(self.pid)
 
     if self.cheats.noclip ~= noclip or self.cheats.flight ~= flight then
-        self.cheats = {noclip = noclip, flight = flight}
+        self.cheats = { noclip = noclip, flight = flight }
         self.changed_flags.cheats = true
     end
 end
