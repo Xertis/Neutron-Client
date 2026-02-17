@@ -51,11 +51,14 @@ function module.join(ip, id, identity, username, on_connect, on_disconnect)
     })
 end
 
-function module.disconnect(server)
+function module.disconnect(server, on_disconnect)
+    on_disconnect = on_disconnect or function () end
+
     if server then
         local socket = server.network.socket
         server:push_packet(protocol.ClientMsg.Disconnect, {})
 
+        print("меняем актив на пассив", debug.getinfo(2).source)
         if server.active then
             server.active = false
         end
@@ -66,6 +69,8 @@ function module.disconnect(server)
     else
         CLIENT:disconnect()
     end
+
+    on_disconnect()
 end
 
 return module

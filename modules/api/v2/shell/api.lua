@@ -2,6 +2,8 @@ require "client:init/requires"
 local connections = require "api/v2/shell/internal/connections"
 local packs = require "api/v2/shell/internal/packs"
 
+local sandbox = require "api/v2/shell/extensions/sandbox"
+
 local internal = {
     connections = connections,
     packs = packs
@@ -9,7 +11,9 @@ local internal = {
 
 local api = {
     internal = {},
-    extensions = {}
+    extensions = {
+        sandbox = sandbox
+    },
 }
 
 
@@ -44,7 +48,8 @@ function api.register_as_shell(config, module)
         module = module,
 
     }
-    api.extensions = module.extensions
+
+    api.extensions = table.merge(module.extensions or {}, api.extensions)
 
     return {
         api_version = API_VERSION,

@@ -1,5 +1,4 @@
 local protocol = require "multiplayer/protocol-kernel/protocol"
-local timer = require "lib/timer"
 
 local module = {}
 local entities_uids = {}

@@ -21,6 +21,7 @@ end
 function Client:connect(address, port, name, state, id, meta)
     local server = Server.new(false, nil, address, port, name)
     self.socket = network.tcp_connect(address, tonumber(port), function (socket)
+
         local network = Network.new(socket)
         server:set("network", network)
         server.connecting = false
@@ -60,16 +61,13 @@ function Client:stop()
 end
 
 function Client:disconnect()
-    if world.is_open() then
-        external_app.close_world()
-    end
-
     for i=#self.servers, 1, -1 do
         local server = self.servers[i]
         local socket = server.network.socket
         server:push_packet(protocol.ClientMsg.Disconnect, {})
         if socket and socket:is_alive() then
             if server.active then
+                SHELL.module.handlers.game.on_disconnect(server)
                 server.active = false
             end
 
@@ -83,27 +81,19 @@ function Client:disconnect()
 end
 
 function Client:tick()
+    if SERVER and not SERVER.active then SERVER = nil end
+
     for index, server in ipairs(self.servers) do
         local socket = server.network.socket
-        if not ((socket and socket:is_alive()) or (server.connecting and not SERVER) or (SERVER == server)) then
+
+        if not ((socket ~= nil and socket:is_alive()) or (server.connecting and not SERVER)) then
             if server.active then
+                SHELL.module.handlers.game.on_disconnect(server)
                 server.active = false
             end
 
-            local global_server = SERVER or {}
-
             if socket and socket:is_alive() then
                 socket:close()
-            end
-
-            if server.id == global_server.id then
-                if world.is_open() then
-                    SHELL.module.handlers.game.on_disconnect()
-                end
-            end
-
-            if server.meta.on_disconnect then
-                server.meta.on_disconnect(server)
             end
 
             table.remove_value(self.servers, server)

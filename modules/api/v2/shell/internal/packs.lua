@@ -12,11 +12,15 @@ function module.set_packs(packs)
     CONTENT_PACKS = packs
 end
 
+function module.reset_packs()
+    CONTENT_PACKS = {"client", SHELL.prefix}
+end
+
 function module.get_packs()
     return table.copy(CONTENT_PACKS)
 end
 
-function module.init_packs_script()
+function module.init_scripts()
     local paths = file.list_all_res("scripts/client/")
 
     for _, path in ipairs(paths) do
@@ -26,10 +30,12 @@ function module.init_packs_script()
     end
 end
 
-function module.reload_packs()
+function module.reload_packs(use_core)
     external_app.reset_content()
     external_app.config_packs(CONTENT_PACKS)
-    external_app.load_content()
+
+    if not use_core then external_app.load_content()
+    else external_app.load_content() end
 end
 
 return module

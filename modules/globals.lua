@@ -1,8 +1,9 @@
-CONTENT_PACKS = {PACK_ID}
-CACHED_DATA = {over = false}
+CONTENT_PACKS = { PACK_ID }
+CACHED_DATA = { over = false }
 
 PLAYER_LIST = {}
 TEMP_PLAYERS = {}
 CLIENT_PLAYER = nil
 CLIENT = nil
+CLIENT_PID = nil
 SERVER = nil
