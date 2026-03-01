@@ -25,30 +25,14 @@ end)
 --Отправляем позицию игрока
 ServerPipe:add_middleware(function(server)
     if CLIENT_PLAYER.changed_flags.pos then
-        server:push_packet(protocol.ClientMsg.PlayerPosition, { pos = {
-            CLIENT_PLAYER.pos.x,
-            CLIENT_PLAYER.pos.y,
-            CLIENT_PLAYER.pos.z
-        }})
-        CLIENT_PLAYER.changed_flags.pos = false
-    end
-    return server
-end)
-
--- Отправляем свойства игрока
-ServerPipe:add_middleware(function(server)
-    if  CLIENT_PLAYER.changed_flags.infinite_items or
-        CLIENT_PLAYER.changed_flags.instant_destruction or
-        CLIENT_PLAYER.changed_flags.interaction_distance
-    then
-        server:push_packet(protocol.ClientMsg.PlayerFeatures, {
-            infinite_items = CLIENT_PLAYER.infinite_items,
-            instant_destruction = CLIENT_PLAYER.instant_destruction,
-            interaction_distance = CLIENT_PLAYER.interaction_distance
+        server:push_packet(protocol.ClientMsg.PlayerPosition, {
+            pos = {
+                CLIENT_PLAYER.pos.x,
+                CLIENT_PLAYER.pos.y,
+                CLIENT_PLAYER.pos.z
+            }
         })
-        CLIENT_PLAYER.changed_flags.infinite_items = false
-        CLIENT_PLAYER.changed_flags.instant_destruction = false
-        CLIENT_PLAYER.changed_flags.interaction_distance = false
+        CLIENT_PLAYER.changed_flags.pos = false
     end
     return server
 end)
@@ -87,18 +71,18 @@ ServerPipe:add_middleware(function(server)
 end)
 
 --Отправляем инвентарь
-ServerPipe:add_middleware(function(server)
-    if CLIENT_PLAYER.changed_flags.inv then
-        server:push_packet(protocol.ClientMsg.PlayerInventory, {CLIENT_PLAYER.inv})
-        CLIENT_PLAYER.changed_flags.inv = false
-    end
-    return server
-end)
+-- ServerPipe:add_middleware(function(server)
+--     if CLIENT_PLAYER.changed_flags.inv then
+--         server:push_packet(protocol.ClientMsg.PlayerInventory, { CLIENT_PLAYER.inv })
+--         CLIENT_PLAYER.changed_flags.inv = false
+--     end
+--     return server
+-- end)
 
 --Отправляем выбранный слот
 ServerPipe:add_middleware(function(server)
     if CLIENT_PLAYER.changed_flags.slot then
-        server:push_packet(protocol.ClientMsg.PlayerHandSlot, {CLIENT_PLAYER.slot})
+        server:push_packet(protocol.ClientMsg.PlayerHandSlot, { CLIENT_PLAYER.slot })
         CLIENT_PLAYER.changed_flags.slot = false
     end
     return server

@@ -5,11 +5,11 @@ local Server = {}
 local max_id = 0
 Server.__index = Server
 
-function Server.new(active, network, address, port, name)
+function Server.new(active, socket, address, port, name)
     local self = setmetatable({}, Server)
 
     self.active = false or active
-    self.network = network
+    self.socket = socket
     self.address = address
     self.port = port
     self.name = name
@@ -17,8 +17,8 @@ function Server.new(active, network, address, port, name)
     self.state = -1
     self.connecting = true
     self.tries = 0
-    self.ping = {ping = 0, last_upd = 0}
-    self.meta = {max_online = 0}
+    self.ping = { ping = 0, last_upd = 0 }
+    self.meta = { max_online = 0 }
     self.ip = address .. ':' .. port
 
     self.handlers = {
@@ -43,10 +43,6 @@ end
 
 function Server:set_active(new_value)
     self.active = new_value
-end
-
-function Server:set(key, val)
-    self[key] = val
 end
 
 function Server:push_packet(packet_type, data)

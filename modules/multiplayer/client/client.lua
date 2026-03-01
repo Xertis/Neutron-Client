@@ -1,4 +1,3 @@
-local Network = require "lib/network/network"
 local Server = require "multiplayer/classes/server"
 local protocol = require "multiplayer/protocol-kernel/protocol"
 local Client_pipe = require "multiplayer/client/client_pipe"
@@ -19,19 +18,18 @@ function Client.new()
 end
 
 function Client:connect(address, port, name, state, id, meta)
-    local server = Server.new(false, nil, address, port, name)
-    self.socket = network.tcp_connect(address, tonumber(port), function (socket)
-
-        local network = Network.new(socket)
-        server:set("network", network)
+    local server = Server.new(false, socket, address, port, name)
+    self.socket = network.tcp_connect(address, tonumber(port), function(socket)
         server.connecting = false
         server.state = state or -1
+        server.socket = socket
+
         socket:set_nodelay(true)
 
         if meta.on_connect then
             meta.on_connect(server)
         end
-    end, function (_, err)
+    end, function(_, err)
         server.connecting = false
         if meta.on_disconnect then
             meta.on_disconnect(server, err)
@@ -39,7 +37,6 @@ function Client:connect(address, port, name, state, id, meta)
     end)
 
     table.merge(server.meta, meta)
-    server.network = {}
 
     if id then
         server.id = id
@@ -61,9 +58,9 @@ function Client:stop()
 end
 
 function Client:disconnect()
-    for i=#self.servers, 1, -1 do
+    for i = #self.servers, 1, -1 do
         local server = self.servers[i]
-        local socket = server.network.socket
+        local socket = server.socket
         server:push_packet(protocol.ClientMsg.Disconnect, {})
         if socket and socket:is_alive() then
             if server.active then
@@ -84,7 +81,7 @@ function Client:tick()
     if SERVER and not SERVER.active then SERVER = nil end
 
     for index, server in ipairs(self.servers) do
-        local socket = server.network.socket
+        local socket = server.socket
 
         if not ((socket ~= nil and socket:is_alive()) or (server.connecting and not SERVER)) then
             if server.active then

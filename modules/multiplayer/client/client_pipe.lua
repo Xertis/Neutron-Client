@@ -1,7 +1,7 @@
 local protocol = require "multiplayer/protocol-kernel/protocol"
 
 local in_menu_handlers = require "multiplayer/client/handling/in_menu"
-local in_game_handlers = require "multiplayer/client/handling/in_game"
+local in_game_handlers = nil
 
 local server_pipe = require "multiplayer/sending/server_pipe"
 
@@ -13,40 +13,35 @@ local receiver = require "multiplayer/protocol-kernel/receiver"
 local ClientPipe = Pipeline.new()
 
 ClientPipe:add_middleware(function(server)
-    local co = server.meta.recieve_co
-    if not co then
-        server.meta.buffer = receiver.create_buffer()
-        co = coroutine.create(function()
-            local buffer = server.meta.buffer
-            while true do
-                local received_any = false
-                while true do
-                    local success, packet = pcall(function()
-                        return protocol.parse_packet("server", buffer)
-                    end)
+    local meta = server.meta
+    local co = meta.receive_co
 
-                    if success and packet then
-                        List.pushright(server.received_packets, packet)
-                        received_any = true
-                    elseif not success then
-                        logger.log("Error while parsing packet: " .. packet .. '\n' .. "Client disconnected", 'E')
+    if not co then
+        meta.buffer = receiver.create_buffer()
+        co = coroutine.create(function()
+            local buffer = meta.buffer
+
+            while true do
+                local success, packet = pcall(protocol.parse_packet, "server", buffer)
+
+                if success and packet then
+                    List.pushright(server.received_packets, packet)
+                else
+                    if not success then
+                        logger.log("Error while parsing packet: " .. tostring(packet) .. '\nClient disconnected', 'E')
                         if CLIENT then CLIENT:disconnect() end
-                        break
-                    else
-                        break
                     end
-                end
-                if not received_any then
+
                     coroutine.yield()
                 end
             end
         end)
-        server.meta.recieve_co = co
+        meta.receive_co = co
     end
 
-    receiver.recv(server.meta.buffer, server)
-
+    receiver.recv(meta.buffer, server)
     coroutine.resume(co)
+
     return server
 end)
 
@@ -63,6 +58,7 @@ ClientPipe:add_middleware(function(server)
                 in_menu_handlers[packet.packet_type](server, packet)
             elseif server.state == protocol.States.Active then
                 if not world.is_open() then return end
+                if not in_game_handlers then in_game_handlers = require "multiplayer/client/handling/in_game" end
                 in_game_handlers[packet.packet_type](server, packet)
             end
         end)
@@ -82,11 +78,10 @@ ClientPipe:add_middleware(function(server)
         server_pipe:process(server)
     end
 
+    local socket = server.socket
     while not List.is_empty(server.response_queue) do
         local packet = List.popleft(server.response_queue)
-        local success, err = pcall(function()
-            server.network:send(packet)
-        end)
+        local success, err = pcall(socket.send, socket, packet)
         if not success then
             break
         end

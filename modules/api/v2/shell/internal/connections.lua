@@ -20,7 +20,7 @@ end
 function module.join(ip, id, identity, username, on_connect, on_disconnect)
     local address, port = string.split_ip(ip)
     CLIENT:connect(address, port, "main", protocol.States.Login, id, {
-        on_connect = function (server)
+        on_connect = function(server)
             on_connect(server)
             local buffer = protocol.create_databuffer()
 
@@ -44,7 +44,7 @@ function module.join(ip, id, identity, username, on_connect, on_disconnect)
                 username = username,
                 identity = identity
             }))
-            server.network:send(buffer.bytes)
+            server.socket:send(buffer.bytes)
         end,
 
         on_disconnect = on_disconnect
@@ -52,10 +52,10 @@ function module.join(ip, id, identity, username, on_connect, on_disconnect)
 end
 
 function module.disconnect(server, on_disconnect)
-    on_disconnect = on_disconnect or function () end
+    on_disconnect = on_disconnect or function() end
 
     if server then
-        local socket = server.network.socket
+        local socket = server.socket
         server:push_packet(protocol.ClientMsg.Disconnect, {})
 
         print("меняем актив на пассив", debug.getinfo(2).source)
