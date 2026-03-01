@@ -56,7 +56,7 @@ end
 function module.sync(id, _inventory)
     if id ~= -1 then
         inventory.set_inv(id2Invid[id], _inventory)
-    else
+    elseif hud.is_player_inventory_open() or hud.is_inventory_open() then
         inventory.set_inv(gui.root["hud.exchange-slot"].inventory, _inventory)
     end
 end
