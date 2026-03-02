@@ -180,16 +180,19 @@ handlers[protocol.ServerMsg.KeepAlive] = function(server, packet)
     server:push_packet(protocol.ClientMsg.KeepAlive, { packet.challenge })
 end
 
-handlers[protocol.ServerMsg.SyncInventory] = function(server, packet)
+handlers[protocol.ServerMsg.InventorySync] = function(server, packet)
     inventory_manager.sync(packet.inventory_id, packet.inventory)
-    CACHED_DATA.inv = packet.inventory
+
+    if packet.inventory_id == 1 then
+        CACHED_DATA.inv = packet.inventory
+    end
 end
 
 handlers[protocol.ServerMsg.OpenBlockInventory] = function(server, packet)
     inventory_manager.open_block(packet.inventory_id, packet.pos)
 end
 
-handlers[protocol.ClientMsg.CloseInventory] = function(server, packet)
+handlers[protocol.ClientMsg.InventoryClose] = function(server, packet)
     inventory_manager.close_inventory_by_id(packet.inventory_id)
 end
 

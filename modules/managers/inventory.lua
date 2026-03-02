@@ -30,6 +30,10 @@ local function close_inventory(invid)
 
     invid2Id[invid] = nil
     id2Invid[id] = nil
+
+    SERVER:push_packet(protocol.ClientMsg.InventoryClose, {
+        inventory_id = id,
+    })
 end
 
 -- id = айди на сервере
@@ -56,7 +60,7 @@ end
 function module.sync(id, _inventory)
     if id ~= -1 then
         inventory.set_inv(id2Invid[id], _inventory)
-    elseif hud.is_player_inventory_open() or hud.is_inventory_open() then
+    elseif hud.is_inventory_open() then
         inventory.set_inv(gui.root["hud.exchange-slot"].inventory, _inventory)
     end
 end

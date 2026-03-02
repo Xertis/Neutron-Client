@@ -55,7 +55,7 @@ function on_inventory_interact(...)
     inventory_manager.interact(...)
 end
 
-function on_inventory_close(invid)
+function on_inventory_closed(invid)
     inventory_manager.close_inventory_by_invid(invid)
 end
 
