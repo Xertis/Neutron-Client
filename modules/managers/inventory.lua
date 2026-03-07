@@ -43,18 +43,19 @@ function module.open_block(id, pos)
     open_inventory(invid, id)
 end
 
-function module.open_virtual(layout, disable_player_inventory, root_id, id)
-    local invid = hud.open(layout, disable_player_inventory, root_id)
+function module.open_virtual(layout, id, disable_player_inventory)
+    local invid = hud.open(layout, disable_player_inventory)
+
     open_inventory(invid, id)
 end
 
-function module.close_inventory_by_invid(invid)
-    close_inventory(invid)
-end
+function module.close_inventory(uncall_hud)
+    local second = hud.get_second_inventory()
 
-function module.close_inventory_by_id(id)
-    close_inventory(id2Invid[id])
-    hud.close_inventory()
+    if second then
+        close_inventory(second)
+        if not uncall_hud then hud.close_inventory() end
+    end
 end
 
 function module.sync(id, _inventory)

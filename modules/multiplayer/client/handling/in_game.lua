@@ -192,8 +192,12 @@ handlers[protocol.ServerMsg.OpenBlockInventory] = function(server, packet)
     inventory_manager.open_block(packet.inventory_id, packet.pos)
 end
 
+handlers[protocol.ServerMsg.OpenVirtualInventory] = function(server, packet)
+    inventory_manager.open_virtual(packet.layout, packet.inventory_id, packet.disable_player_inventory)
+end
+
 handlers[protocol.ClientMsg.InventoryClose] = function(server, packet)
-    inventory_manager.close_inventory_by_id(packet.inventory_id)
+    inventory_manager.close_inventory()
 end
 
 handlers[protocol.ServerMsg.PlayerHandSlot] = function(server, packet)

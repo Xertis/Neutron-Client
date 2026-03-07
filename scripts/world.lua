@@ -17,7 +17,6 @@ function on_world_open()
     protocol = require "multiplayer/protocol-kernel/protocol"
     sandbox = start_require "multiplayer/client/sandbox"
     inventory_manager = require "managers/inventory"
-    debug.print(inventory_manager)
     utils = require "lib/utils"
 
     require "init/cmd"
@@ -51,12 +50,8 @@ function on_chunk_remove(x, z)
     loaded_chunks[x .. '/' .. z] = nil
 end
 
-function on_inventory_interact(...)
-    inventory_manager.interact(...)
-end
-
 function on_inventory_closed(invid)
-    inventory_manager.close_inventory_by_invid(invid)
+    inventory_manager.close_inventory(true)
 end
 
 function on_world_tick()
