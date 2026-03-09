@@ -1,7 +1,7 @@
 local protocol = require "multiplayer/protocol-kernel/protocol"
 
 local in_menu_handlers = require "multiplayer/client/handling/in_menu"
-local in_game_handlers = nil
+local in_game_handlers = require "multiplayer/client/handling/in_game"
 
 local server_pipe = require "multiplayer/sending/server_pipe"
 
@@ -57,8 +57,6 @@ ClientPipe:add_middleware(function(server)
             if server.state ~= protocol.States.Active then
                 in_menu_handlers[packet.packet_type](server, packet)
             elseif server.state == protocol.States.Active then
-                if not world.is_open() then return end
-                if not in_game_handlers then in_game_handlers = require "multiplayer/client/handling/in_game" end
                 in_game_handlers[packet.packet_type](server, packet)
             end
         end)
