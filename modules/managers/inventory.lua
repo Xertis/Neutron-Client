@@ -92,7 +92,7 @@ function module.interact(invid, slot, action, mode)
     if invid ~= 0 then
         item_id = inventory.get(invid, slot)
     else
-        item_id = get_cursor()
+        item_id = slot + 1
     end
 
     SERVER:push_packet(protocol.ClientMsg.InventoryInteract, {
