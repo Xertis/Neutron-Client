@@ -2,7 +2,7 @@ local shell_api = require "api/v2/shell/api"
 local events = start_require "api/v2/events"
 local entities = start_require "api/v2/entities"
 local env = start_require "api/v2/env"
-local sandbox = require "api/v2/sandbox"
+--local sandbox = require "api/v2/sandbox"
 local rpc = require "api/v2/rpc"
 local bson = require "lib/files/bson"
 local inv_dat = require "api/v2/inv_dat"
@@ -13,7 +13,7 @@ local client_api = {
     bson = bson,
     env = env,
     entities = entities,
-    sandbox = sandbox,
+    --sandbox = sandbox,
     inventory_data = inv_dat,
 }
 

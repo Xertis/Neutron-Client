@@ -86,7 +86,7 @@ local function checksum(invid)
     return table.checksum({ inv, cursor })
 end
 
-function module.interact(invid, slot, action)
+function module.interact(invid, slot, action, mode)
     local item_id = 0
 
     if invid ~= 0 then
@@ -99,6 +99,7 @@ function module.interact(invid, slot, action)
         inventory_id = invid2Id[invid],
         slot = slot,
         action = action,
+        mode = mode,
         item_id = item_id,
         checksum = checksum(invid)
     })

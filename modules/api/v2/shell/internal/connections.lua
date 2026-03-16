@@ -58,7 +58,6 @@ function module.disconnect(server, on_disconnect)
         local socket = server.socket
         server:push_packet(protocol.ClientMsg.Disconnect, {})
 
-        print("меняем актив на пассив", debug.getinfo(2).source)
         if server.active then
             server.active = false
         end

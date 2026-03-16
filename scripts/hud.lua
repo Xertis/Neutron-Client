@@ -12,6 +12,6 @@ function on_hud_render()
     events.emit("client:hud_render")
 end
 
-function on_hud_inventory_interact(...)
+function on_inventory_interact(...)
     inventory_manager.interact(...)
 end
