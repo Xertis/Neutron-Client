@@ -5,13 +5,13 @@ _G['$Multiplayer'] = {
     side = "client",
     pack_id = "client",
     api_references = {
-        Neutron = {"v1", "v2", latest = "v2"}
+        Neutron = { "v1", "v2", latest = "v2" }
     }
 }
 
 --- PLAYER
 
-player.set_pos_interpolated = function (pid, x, y, z, no_interpolated)
+player.set_pos_interpolated = function(pid, x, y, z, no_interpolated)
     no_interpolated = no_interpolated or false
     if not _G["$Multiplayer"] or no_interpolated then
         player.set_pos(pid, x, y, z)
@@ -23,15 +23,15 @@ player.set_pos_interpolated = function (pid, x, y, z, no_interpolated)
     if entity then
         entity.rigidbody:set_enabled(true)
         local transform, rigidbody = entity.transform, entity.rigidbody
-        rigidbody:set_vel({0, 0, 0})
+        rigidbody:set_vel({ 0, 0, 0 })
         local current_pos = transform:get_pos()
-        local target_pos = {x, y, z}
+        local target_pos = { x, y, z }
         local direction = vec3.sub(target_pos, current_pos)
         local distance = vec3.length(direction)
 
         if distance > 5 or distance < 0.01 then
             player.set_pos(pid, x, y, z)
-            rigidbody:set_vel({0, 0, 0})
+            rigidbody:set_vel({ 0, 0, 0 })
         elseif rigidbody then
             local time_to_reach = 0.1
             local velocity = vec3.mul(vec3.normalize(direction), distance / time_to_reach)
@@ -51,14 +51,14 @@ function player.get_dir(pid)
     local y = -math.sin(pitch_rad)
     local z = math.cos(pitch_rad) * math.cos(yaw_rad)
 
-    return {-x, -y, -z}
+    return { -x, -y, -z }
 end
 
 --- STRING
 
 function string.type(str)
     if not str then
-        return "nil", function (s)
+        return "nil", function(s)
             if s then
                 return s
             end
@@ -116,7 +116,7 @@ function string.multiline_concat(str1, str2, space)
     local result = {}
     for i, line in ipairs(str1_lines) do
         local str2_line = str2_lines[i] or ''
-        table.insert(result, line .. string.rep(' ', len-#line) .. str2_line)
+        table.insert(result, line .. string.rep(' ', len - #line) .. str2_line)
     end
 
     return table.concat(result, '\n')
@@ -170,7 +170,6 @@ function string.split_ip(ip)
     return unpack(string.split(ip, ':'))
 end
 
-
 -- TIME
 
 function time.day_time_to_uint16(time)
@@ -184,7 +183,7 @@ table.unpack = unpack
 function table.unique(tbl)
     local seen = {}
 
-    for i=#tbl, 1, -1 do
+    for i = #tbl, 1, -1 do
         local v = tbl[i]
         if not seen[v] then
             seen[v] = true
@@ -196,7 +195,7 @@ function table.unique(tbl)
 end
 
 function table.rep(tbl, elem, rep_count)
-    for i=1, rep_count do
+    for i = 1, rep_count do
         table.insert(tbl, table.deep_copy(elem))
     end
 
@@ -204,7 +203,7 @@ function table.rep(tbl, elem, rep_count)
 end
 
 function table.get_default(tbl, ...)
-    for _, key in ipairs({...}) do
+    for _, key in ipairs({ ... }) do
         if not tbl[key] then
             return nil
         end
@@ -280,7 +279,7 @@ function table.to_dict(tbl, pattern)
 end
 
 function table.has(t, x)
-    for i,v in pairs(t) do
+    for i, v in pairs(t) do
         if v == x then
             return true
         end
@@ -295,7 +294,7 @@ function table.to_serializable(t)
         local item_type = type(v)
         if item_type == "table" then
             serializable[k] = table.to_serializable(v)
-        elseif table.has({"number", "string", "boolean"}, item_type) then
+        elseif table.has({ "number", "string", "boolean" }, item_type) then
             serializable[k] = v
         end
     end
@@ -420,6 +419,60 @@ function table.from_bytearray(bytearray)
     return bytes
 end
 
+function table.checksum(data)
+    local hash = 5381
+    local MAX_32 = 4294967296
+    local uint24_mask = 16777216
+
+    local function mix(val)
+        hash = ((hash * 33) + val) % MAX_32
+    end
+
+    local function process(item)
+        local t = type(item)
+
+        if t == "number" then
+            mix(1)
+            local floor, frac = math.modf(item)
+            mix(math.abs(floor) % MAX_32)
+            mix(math.floor(math.abs(frac) * 1000000))
+        elseif t == "string" then
+            mix(2)
+            for i = 1, #item do
+                mix(string.byte(item, i))
+            end
+        elseif t == "boolean" then
+            mix(3)
+            mix(item and 1 or 0)
+        elseif t == "table" then
+            mix(4)
+            local keys = {}
+            for k in pairs(item) do
+                local kt = type(k)
+                if kt == "string" or kt == "number" or kt == "boolean" then
+                    table.insert(keys, k)
+                end
+            end
+
+            table.sort(keys, function(a, b)
+                if type(a) ~= type(b) then
+                    return type(a) < type(b)
+                end
+                return a < b
+            end)
+
+            for _, k in ipairs(keys) do
+                process(k)
+                process(item[k])
+            end
+        end
+    end
+
+    process(data)
+
+    return hash % uint24_mask
+end
+
 --- MATH
 
 function math.euclidian3D(x1, y1, z1, x2, y2, z2)
@@ -441,7 +494,6 @@ function math.bit_length(num)
     end
     return count
 end
-
 
 -- FUNCTIONS
 
@@ -484,7 +536,7 @@ function bjson.archive_frombytes(bytes)
     local len = db:get_uint16()
     local res = {}
 
-    for _=1, len do
+    for _ = 1, len do
         local size = db:get_int64()
 
         table.insert(res, bjson.frombytes(db:get_bytes(size)))
@@ -504,7 +556,7 @@ local function iter(table, idx)
 end
 
 local function start_at(table, idx)
-    return iter, table, idx-1
+    return iter, table, idx - 1
 end
 
 function file.recursive_list(path)
@@ -529,7 +581,7 @@ function file.join(...)
     if type(...) == "table" then
         parts = ...
     else
-        parts = {...}
+        parts = { ... }
     end
 
     if #parts > 0 and type(parts[1]) == "string" and parts[1]:sub(-1) == ":" then
@@ -563,7 +615,7 @@ end
 function file.mktree(path, value)
     path = file.split(path)
     path[1] = path[1] .. ':'
-    local split_path = table.sub(path, 1, #path-1)
+    local split_path = table.sub(path, 1, #path - 1)
 
     file.mkdirs(file.join(split_path))
     file.write_bytes(file.join(path), value)
@@ -575,7 +627,7 @@ function inventory.get_inv(invid)
     local inv_size = inventory.size(invid)
     local res_inv = {}
 
-    for slot = 0, inv_size-1 do
+    for slot = 0, inv_size - 1 do
         local item_id, count = inventory.get(invid, slot)
         local index = slot + 1
 
@@ -587,7 +639,7 @@ function inventory.get_inv(invid)
                 meta = item_data
             }
         else
-            res_inv[index] = {id = 0, count = 0}
+            res_inv[index] = { id = 0, count = 0 }
         end
     end
 
@@ -622,12 +674,12 @@ function bit.tobits(num, is_sign)
 
     num = math.abs(num)
 
-    local t={}
+    local t = {}
     local rest = nil
-    while num>0 do
-        rest=math.fmod(num,2)
-        t[#t+1]=rest
-        num=(num-rest)/2
+    while num > 0 do
+        rest = math.fmod(num, 2)
+        t[#t + 1] = rest
+        num = (num - rest) / 2
     end
 
     if is_sign then
@@ -647,7 +699,7 @@ function bit.tonum(bits, is_sign)
         degree = #bits - j
 
         if not is_sign or i < #bits then
-            num = num + val^(degree-1)
+            num = num + val ^ (degree - 1)
         end
     end
 
@@ -691,7 +743,7 @@ function vec3.culling(view_dir, pos, target_pos, fov_degrees)
     local angle_rad = math.acos(dot_product)
     local angle_deg = math.deg(angle_rad)
 
-    return angle_deg <= (fov_degrees+30) / 2
+    return angle_deg <= (fov_degrees + 30) / 2
 end
 
 function vec3.checksum(x, y, z)
@@ -726,21 +778,21 @@ end
 function cached_require(path)
     if not string.find(path, ':') then
         local prefix, _ = parse_path(debug.getinfo(2).source)
-        return cached_require(prefix..':'..path)
+        return cached_require(prefix .. ':' .. path)
     end
     local prefix, file = parse_path(path)
-    return package.loaded[prefix..":modules/"..file..".lua"]
+    return package.loaded[prefix .. ":modules/" .. file .. ".lua"]
 end
 
 function start_require(path)
     if not string.find(path, ':') then
         local prefix, _ = parse_path(debug.getinfo(2).source)
-        return start_require(prefix..':'..path)
+        return start_require(prefix .. ':' .. path)
     end
 
     local old_path = path
     local prefix, file = parse_path(path)
-    path = prefix..":modules/"..file..".lua"
+    path = prefix .. ":modules/" .. file .. ".lua"
 
     if not _G["/$p"] then
         return require(old_path)

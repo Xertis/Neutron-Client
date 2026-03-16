@@ -3,6 +3,7 @@ local Player = require "multiplayer/classes/player"
 local protocol = nil
 local sandbox = nil
 local utils = nil
+local inventory_manager = nil
 
 local buffer = {}
 local loaded_chunks = {}
@@ -15,6 +16,7 @@ local CHUNK_LOADING_DISTANCE = nil
 function on_world_open()
     protocol = require "multiplayer/protocol-kernel/protocol"
     sandbox = start_require "multiplayer/client/sandbox"
+    inventory_manager = require "managers/inventory"
     utils = require "lib/utils"
 
     require "init/cmd"
@@ -46,6 +48,10 @@ end
 
 function on_chunk_remove(x, z)
     loaded_chunks[x .. '/' .. z] = nil
+end
+
+function on_inventory_closed(invid)
+    inventory_manager.close_inventory(true)
 end
 
 function on_world_tick()

@@ -19,7 +19,7 @@ handlers["handshake"] = function(server)
         }))
         buffer:put_packet(protocol.build_packet("client", protocol.ClientMsg.StatusRequest, {}))
 
-        server.network:send(buffer.bytes)
+        server.socket:send(buffer.bytes)
 
         server.state = protocol.States.Status
     end
@@ -68,7 +68,7 @@ handlers[protocol.ServerMsg.PacksList] = function(server, packet)
     local buffer = protocol.create_databuffer()
 
     buffer:put_packet(protocol.build_packet("client", protocol.ClientMsg.PackHashes, { hashes }))
-    server.network:send(buffer.bytes)
+    server.socket:send(buffer.bytes)
 end
 
 handlers[protocol.ServerMsg.JoinSuccess] = function(server, packet)
