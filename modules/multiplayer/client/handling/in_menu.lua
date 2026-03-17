@@ -1,4 +1,5 @@
 local protocol = require "multiplayer/protocol-kernel/protocol"
+local Player = require "multiplayer/classes/player"
 local hash = require "lib/common/hash"
 
 local handlers = {}
@@ -49,14 +50,16 @@ handlers[protocol.ServerMsg.PacksList] = function(server, packet)
         table.insert_unique(CONTENT_PACKS, packs[i])
     end
 
-    local events_handlers = table.copy(events.handlers)
+    if IS_REMOTE then
+        local events_handlers = table.copy(events.handlers)
 
-    external_app.reset_content()
-    external_app.config_packs(CONTENT_PACKS)
+        external_app.reset_content()
+        external_app.config_packs(CONTENT_PACKS)
 
-    external_app.load_content()
+        external_app.load_content()
 
-    events.handlers = table.merge(events_handlers, events.handlers)
+        events.handlers = table.merge(events_handlers, events.handlers)
+    end
 
     for i, pack in ipairs(packs) do
         table.insert(hashes, {
@@ -76,14 +79,19 @@ handlers[protocol.ServerMsg.JoinSuccess] = function(server, packet)
 
     server.active = true
 
-    external_app.reset_content()
-    external_app.config_packs(CONTENT_PACKS)
+    if IS_REMOTE then
+        external_app.reset_content()
+        external_app.config_packs(CONTENT_PACKS)
+
+        external_app.new_world("", "41530140565755", PACK_ID .. ":void", packet.pid)
+    end
 
     SERVER = server
     CHUNK_LOADING_DISTANCE = packet.chunks_loading_distance
     CLIENT_PID = packet.pid
 
-    external_app.new_world("", "41530140565755", PACK_ID .. ":void", packet.pid)
+    print("Создай игрока, заибал")
+    CLIENT_PLAYER = Player.new(CLIENT_PID, SHELL.module.states.get_username())
 
     for _, rule in ipairs(packet.rules) do
         rules.set(rule[1], rule[2])

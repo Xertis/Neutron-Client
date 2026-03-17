@@ -23,8 +23,13 @@ function module.join(ip, id, identity, username, on_connect, on_disconnect)
         on_connect = function(server)
             on_connect(server)
             local buffer = protocol.create_databuffer()
+            local major, minor = nil, nil
+            if IS_REMOTE then
+                major, minor = external_app.get_version()
+            else
+                major, minor = 0, 31
+            end
 
-            local major, minor = external_app.get_version()
             local engine_version = string.format("%s.%s.0", major, minor)
 
             buffer:put_packet(protocol.build_packet("client", protocol.ClientMsg.HandShake, {

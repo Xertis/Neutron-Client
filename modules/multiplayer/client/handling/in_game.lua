@@ -88,6 +88,7 @@ handlers[protocol.ServerMsg.ChatMessage] = function(server, packet)
 end
 
 handlers[protocol.ServerMsg.SynchronizePlayer] = function(server, packet)
+    if not IS_REMOTE then return end
     local player_data = packet.data
 
     CLIENT_PLAYER:set_pos(player_data.pos, false)

@@ -2,6 +2,7 @@ PACK_ID = "client"
 SHELL = nil
 
 CHUNK_LOADING_DISTANCE = 0
+IS_REMOTE = true
 
 COLORS = {
     red = "[#ff0000]",
