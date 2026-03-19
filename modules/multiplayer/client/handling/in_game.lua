@@ -56,15 +56,10 @@ handlers[protocol.ServerMsg.BlockChanged] = function(server, packet)
     local pid = packet.pid
     local block_data = packet.block
     local block_pos = block_data.pos
-    if pid == 0 then pid = -1 end
 
     local old_id = block.get(block_pos.x, block_pos.y, block_pos.z)
     local new_id = block_data.id
 
-    --[[TODO: Проверка эта нужна,
-        но хз как она повлияет на код, по идее если чанк не загружен, то он его загрузит
-        Но это нуждается в проверке
-    ]]
     if old_id == -1 then return end
 
     if pid ~= -1 and pid ~= CLIENT_PLAYER.pid then
