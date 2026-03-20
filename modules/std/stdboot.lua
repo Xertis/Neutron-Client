@@ -53,6 +53,8 @@ function logger.log(text, type, only_save, custom_source)
         source = custom_source
     end
 
+    source = "C:/" .. source
+
     local out = '[' .. string.left_pad(source, 20) .. '] ' .. text
 
     local uptime = time.formatted_time()
@@ -60,7 +62,7 @@ function logger.log(text, type, only_save, custom_source)
     local timestamp = string.format("[%s] %s", type, uptime)
 
     local path = "export:client.log"
-    local message = timestamp .. string.left_pad(out, #out+33-#timestamp)
+    local message = timestamp .. string.left_pad(out, #out + 33 - #timestamp)
 
     if not only_save then
         print(message)

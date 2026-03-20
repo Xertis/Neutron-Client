@@ -22,7 +22,7 @@ local function parse_path(path)
     if index == nil then
         error("invalid path syntax (':' missing)")
     end
-    return string.sub(path, 1, index-1), string.sub(path, index+1, -1)
+    return string.sub(path, 1, index - 1), string.sub(path, index + 1, -1)
 end
 
 local meta = {
@@ -32,7 +32,8 @@ local meta = {
             return internal[key]
         end
 
-        return error("Only the shell has access to this system. To gain access to internal systems, you must register the pack as a shell")
+        return error(
+            "Only the shell has access to this system. To gain access to internal systems, you must register the pack as a shell")
     end
 }
 
@@ -40,6 +41,14 @@ function api.register_as_shell(config, module)
     if SHELL then
         error("The shell is already registered")
     end
+
+    _G['$Multiplayer'] = {
+        side = "client",
+        pack_id = "client",
+        api_references = {
+            Neutron = { "v1", "v2", latest = "v2" }
+        }
+    }
 
     local prefix = parse_path(debug.getinfo(2, 'S').source)
     SHELL = {
@@ -57,8 +66,19 @@ function api.register_as_shell(config, module)
     }
 end
 
+function api.__run_in_standalone(port)
+    local shell_module = require "init/standalone" ()
+    SHELL = {
+        prefix = "client",
+        config = {},
+        module = shell_module
+    }
+    api.extensions = {}
+    connections.join("localhost:" .. port, 1, "player", "player", function() end, function() end)
+end
+
 function internal.run(app)
-    require "init/client"(app)
+    require "init/client" (app)
 end
 
 setmetatable(api.internal, meta)

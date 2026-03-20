@@ -1,6 +1,5 @@
 local data_buffer = require "lib/files/bit_buffer"
 
-_G['$Neutron'] = "client"
 _G['$Multiplayer'] = {
     side = "client",
     pack_id = "client",
@@ -792,13 +791,13 @@ function start_require(path)
 
     local old_path = path
     local prefix, file = parse_path(path)
-    path = prefix .. ":modules/" .. file .. ".lua"
+    local module_path = prefix .. ":modules/" .. file .. ".lua"
 
-    if not _G["/$p"] then
-        return require(old_path)
+    if _G["/$p"] and _G["/$p"][module_path] then
+        return _G["/$p"][module_path]
     end
 
-    return _G["/$p"][path]
+    return require(old_path)
 end
 
 function tohex(num)
