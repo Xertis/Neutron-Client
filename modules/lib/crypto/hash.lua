@@ -1,6 +1,6 @@
 local module = {}
 
-local sha256 = require "lib/common/sha256"
+local sha256 = import "lib/crypto/sha256"
 
 for key, func in pairs(sha256) do
     module[key] = func

@@ -1,5 +1,5 @@
-local protocol = require "multiplayer/protocol-kernel/protocol"
-local List = require "lib/common/list"
+local protocol = import "net/protocol/protocol"
+local List = import "lib/utils/list"
 
 local Server = {}
 local max_id = 0

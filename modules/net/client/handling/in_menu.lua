@@ -1,5 +1,5 @@
-local protocol = require "multiplayer/protocol-kernel/protocol"
-local hash = require "lib/common/hash"
+local protocol = import "net/protocol/protocol"
+local hash = import "lib/crypto/hash"
 
 local handlers = {}
 

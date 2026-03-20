@@ -1,7 +1,6 @@
-
-local bit_buffer = require "lib/files/bit_buffer"
-local kernel = require "multiplayer/protocol-kernel/kernel"
-local receiver = require "multiplayer/protocol-kernel/receiver"
+local bit_buffer = import "lib/io/bit_buffer"
+local kernel = import "net/protocol/kernel"
+local receiver = import "net/protocol/receiver"
 local protocol = {}
 
 logger.log("Initializing protocol...")
@@ -41,7 +40,7 @@ function protocol.build_packet(client_or_server, packet_type, data)
         logger.log(debug.traceback(), 'E', true)
 
         logger.log("Packet:", 'E', true)
-        logger.log(table.tostring({client_or_server, packet_type}), 'E', true)
+        logger.log(table.tostring({ client_or_server, packet_type }), 'E', true)
 
         logger.log("Data:", 'E', true)
         logger.log(json.tostring(data), 'E', true)
@@ -70,7 +69,7 @@ function protocol.parse_packet(client_or_server, external_buffer)
         logger.log(debug.traceback(), 'E', true)
 
         logger.log("Packet:", 'E', true)
-        logger.log(table.tostring({client_or_server, packet_type}), 'E', true)
+        logger.log(table.tostring({ client_or_server, packet_type }), 'E', true)
 
         logger.log("Data:", 'E', true)
         logger.log(table.tostring(data), 'E', true)

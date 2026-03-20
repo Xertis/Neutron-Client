@@ -1,14 +1,14 @@
-local protocol = require "multiplayer/protocol-kernel/protocol"
+local protocol = import "net/protocol/protocol"
 
-local in_menu_handlers = require "multiplayer/client/handling/in_menu"
-local in_game_handlers = require "multiplayer/client/handling/in_game"
+local in_menu_handlers = import "net/client/handling/in_menu"
+local in_game_handlers = import "net/client/handling/in_game"
 
-local server_pipe = require "multiplayer/sending/server_pipe"
+local server_pipe = import "net/client/sending/server_pipe"
 
-local Pipeline = require "lib/common/pipeline"
-local List = require "lib/common/list"
+local Pipeline = import "lib/flow/pipeline"
+local List = import "lib/utils/list"
 
-local receiver = require "multiplayer/protocol-kernel/receiver"
+local receiver = import "net/protocol/receiver"
 
 local ClientPipe = Pipeline.new()
 

@@ -1,6 +1,6 @@
-local Server = require "multiplayer/classes/server"
-local protocol = require "multiplayer/protocol-kernel/protocol"
-local Client_pipe = require "multiplayer/client/client_pipe"
+local Server = import "net/classes/server"
+local protocol = import "net/protocol/protocol"
+local Client_pipe = import "net/client/client_pipe"
 
 local Client = {}
 Client.__index = Client

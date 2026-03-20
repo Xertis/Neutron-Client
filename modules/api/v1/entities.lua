@@ -1,5 +1,5 @@
-local protocol = require "multiplayer/protocol-kernel/protocol"
-local timer = require "lib/timer"
+local protocol = import "net/protocol/protocol"
+local timer = import "lib/utils/timer"
 
 local module = {}
 local entities_uids = {}
@@ -10,7 +10,7 @@ local desynced_entities = {}
 local PLAYER_ENTITY_ID = nil
 
 local function vec_zero()
-    return {0, 0, 0}
+    return { 0, 0, 0 }
 end
 
 local original_spawn = entities.spawn
@@ -26,7 +26,7 @@ entities.spawn = function(name, ...)
     local entity = original_spawn(name, ...)
     entity:despawn()
 
-    SERVER:push_packet(protocol.ClientMsg.EntitySpawnAttempt, {def = entity:def_index(), args = {...}})
+    SERVER:push_packet(protocol.ClientMsg.EntitySpawnAttempt, { def = entity:def_index(), args = { ... } })
 
     return entity
 end
@@ -155,8 +155,8 @@ function module.__emit__(uid, def, dirty)
             new_entity.rigidbody:set_gravity_scale(vec_zero())
         end
 
-        local chunk_env = {entity = new_entity}
-        setmetatable(chunk_env, {__index = _G})
+        local chunk_env = { entity = new_entity }
+        setmetatable(chunk_env, { __index = _G })
 
         local chunk = __load_script("client:modules/components/controller.lua", true, chunk_env)
 

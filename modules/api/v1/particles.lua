@@ -1,5 +1,5 @@
-local entities = require "api/v1/entities"
-local utils = require "lib/utils"
+local entities = import "api/v1/entities"
+local utils = import "lib/utils/utils"
 
 local uids = entities.__get_uids__()
 local PARTICLES_PID = {}
@@ -11,14 +11,14 @@ function module.emit(particle)
         if origin then
             particle.origin = origin
         else
-            utils.to_tick(function (_particle)
+            utils.to_tick(function(_particle)
                 if uids[_particle.origin] then
                     module.emit(_particle)
                     return
                 end
 
-                return {_particle}
-            end, {particle}, tostring(particle.pid) .. "particle")
+                return { _particle }
+            end, { particle }, tostring(particle.pid) .. "particle")
 
             return
         end

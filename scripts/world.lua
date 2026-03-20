@@ -1,5 +1,3 @@
-local Player = require "multiplayer/classes/player"
-
 local protocol = nil
 local sandbox = nil
 local utils = nil
@@ -14,12 +12,14 @@ local CLIENT_PLAYER = nil
 local CHUNK_LOADING_DISTANCE = nil
 
 function on_world_open()
-    protocol = require "multiplayer/protocol-kernel/protocol"
-    sandbox = start_require "multiplayer/client/sandbox"
-    inventory_manager = require "managers/inventory"
-    utils = require "lib/utils"
+    local Player = import "net/classes/player"
 
-    require "init/cmd"
+    protocol = import "net/protocol/protocol"
+    sandbox = import "managers/sandbox"
+    inventory_manager = import "managers/inventory"
+    utils = import "lib/utils/utils"
+
+    import "init/cmd"
     -------------------------
     local env = session.get_entry("neutron-client-env")
     CACHED_DATA = env.CACHED_DATA

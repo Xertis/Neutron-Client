@@ -1,6 +1,6 @@
-local Pipeline = require "lib/common/pipeline"
-local protocol = require "multiplayer/protocol-kernel/protocol"
-local sandbox = require "multiplayer/client/sandbox"
+local Pipeline = import "lib/flow/pipeline"
+local protocol = import "net/protocol/protocol"
+local sandbox = import "managers/sandbox"
 
 local ServerPipe = Pipeline.new()
 

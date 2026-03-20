@@ -1,10 +1,9 @@
-local events = start_require "api/v1/events"
-local entities = start_require "api/v1/entities"
-local env = start_require "api/v1/env"
-local sandbox = require "api/v1/sandbox"
-local rpc = require "api/v1/rpc"
-local bson = require "lib/files/bson"
-local inv_dat = require "api/v1/inv_dat"
+local events = import "api/v1/events"
+local entities = import "api/v1/entities"
+local env = import "api/v1/env"
+local rpc = import "api/v1/rpc"
+local bson = import "lib/data/bson"
+local inv_dat = import "api/v1/inv_dat"
 
 local api = {
     events = events,
@@ -12,8 +11,7 @@ local api = {
     bson = bson,
     env = env,
     entities = entities,
-    sandbox = sandbox,
     inventory_data = inv_dat,
 }
 
-return {client = api}
+return { client = api }

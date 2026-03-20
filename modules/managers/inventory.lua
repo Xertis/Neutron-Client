@@ -1,4 +1,4 @@
-local protocol = require "multiplayer/protocol-kernel/protocol"
+local protocol = import "net/protocol/protocol"
 local module = {}
 
 local function get_cursor()

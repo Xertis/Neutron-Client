@@ -1,5 +1,8 @@
--- STRING
+-- IMPORT
 
+import = require
+
+-- STRING
 function string.replace_substr(str1, str2, start, finish)
     if start < 1 or finish > #str1 or start > finish then
         return nil
@@ -47,11 +50,9 @@ function logger.log(text, type, only_save, custom_source)
 
     text = string.first_low(text)
 
-    local source = file.name(debug.getinfo(2).source)
+    local source = (debug.getinfo(2).source):match("([^/]+/[^/]+)$"):sub(1, -5)
 
-    if custom_source and source == "main.lua" then
-        source = custom_source
-    end
+    source = custom_source or source
 
     local out = '[' .. string.left_pad(source, 20) .. '] ' .. text
 
@@ -60,7 +61,7 @@ function logger.log(text, type, only_save, custom_source)
     local timestamp = string.format("[%s] %s", type, uptime)
 
     local path = "export:client.log"
-    local message = timestamp .. string.left_pad(out, #out+33-#timestamp)
+    local message = timestamp .. string.left_pad(out, #out + 33 - #timestamp)
 
     if not only_save then
         print(message)
@@ -81,4 +82,12 @@ end
 
 function logger.blank()
     print()
+end
+
+local sha256 = import "lib/crypto/sha256"
+function logger.shorted(str, size)
+    size = size or 7
+
+    local hashed = sha256.sha256(str)
+    return string.sub(hashed, 1, size)
 end

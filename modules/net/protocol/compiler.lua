@@ -1,9 +1,9 @@
-local types_parser = require "multiplayer/protocol-kernel/types_parser"
-local tokenizer = require "multiplayer/protocol-kernel/tokenizer"
+local types_parser = import "net/protocol/types_parser"
+local tokenizer = import "net/protocol/tokenizer"
 
-local bincode = require "lib/files/bincode"
-local bson = require "lib/files/bson"
-local edd = require "lib/files/edd"
+local bincode = import "lib/io/bincode"
+local bson = import "lib/data/bson"
+local edd = import "lib/data/edd"
 
 local module = {}
 

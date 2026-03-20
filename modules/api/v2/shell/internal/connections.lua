@@ -1,4 +1,4 @@
-local protocol = start_require "multiplayer/protocol-kernel/protocol"
+local protocol = import "net/protocol/protocol"
 
 local module = {}
 

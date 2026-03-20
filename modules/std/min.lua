@@ -1,4 +1,4 @@
-local data_buffer = require "lib/files/bit_buffer"
+local data_buffer = import "lib/io/bit_buffer"
 
 _G['$Neutron'] = "client"
 _G['$Multiplayer'] = {
@@ -774,32 +774,6 @@ function vec3.checksum(x, y, z)
 end
 
 -- OTHER
-
-function cached_require(path)
-    if not string.find(path, ':') then
-        local prefix, _ = parse_path(debug.getinfo(2).source)
-        return cached_require(prefix .. ':' .. path)
-    end
-    local prefix, file = parse_path(path)
-    return package.loaded[prefix .. ":modules/" .. file .. ".lua"]
-end
-
-function start_require(path)
-    if not string.find(path, ':') then
-        local prefix, _ = parse_path(debug.getinfo(2).source)
-        return start_require(prefix .. ':' .. path)
-    end
-
-    local old_path = path
-    local prefix, file = parse_path(path)
-    path = prefix .. ":modules/" .. file .. ".lua"
-
-    if not _G["/$p"] then
-        return require(old_path)
-    end
-
-    return _G["/$p"][path]
-end
 
 function tohex(num)
     return string.format("%x", num)

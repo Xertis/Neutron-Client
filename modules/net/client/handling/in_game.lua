@@ -1,15 +1,15 @@
-local protocol = require "multiplayer/protocol-kernel/protocol"
-local Player = require "multiplayer/classes/player"
+local protocol = import "net/protocol/protocol"
+local Player = import "net/classes/player"
 
-local api_events = require "api/v2/events"
-local api_entities = require "api/v2/entities"
-local api_env = require "api/v2/env"
-local api_particles = require "api/v2/particles"
-local api_audio = require "api/v2/audio"
-local api_text3d = require "api/v2/text3d"
-local api_wraps = require "api/v2/wraps"
+local api_events = import "api/v2/events"
+local api_entities = import "api/v2/entities"
+local api_env = import "api/v2/env"
+local api_particles = import "managers/particles"
+local api_audio = import "managers/audio"
+local api_text3d = import "managers/text3d"
+local api_wraps = import "managers/wraps"
 
-local inventory_manager = require "managers/inventory"
+local inventory_manager = import "managers/inventory"
 local handlers = {}
 
 handlers[protocol.ServerMsg.Disconnect] = function(server, packet)

@@ -1,4 +1,4 @@
-local compiler = require "multiplayer/protocol-kernel/compiler"
+local compiler = import "net/protocol/compiler"
 local module = {
     server = {
         letters = {},

@@ -1,4 +1,4 @@
-local protocol = require "multiplayer/protocol-kernel/protocol"
+local protocol = import "net/protocol/protocol"
 
 local envs = {}
 local module = {}
@@ -21,7 +21,7 @@ function module.create_env(pack, env_name)
         end,
 
         __newindex = function(_, key, value)
-            if not table.has({"number", "boolean", "string", "nil"}, type(value)) then
+            if not table.has({ "number", "boolean", "string", "nil" }, type(value)) then
                 error("Env-table cannot contain " .. type(value) .. "'s")
             elseif type(key) ~= "string" then
                 error("Env-table can only contain key-value pairs")
@@ -35,7 +35,6 @@ function module.create_env(pack, env_name)
                 key = key,
                 value = value
             })
-
         end,
     })
 
@@ -46,7 +45,9 @@ function module.__env_update__(pack, env_name, key, value)
     local pack_envs = envs[pack] or {}
 
     if pack_envs[env_name] == nil then
-        logger.log(string.format('The env-table "%s" of the "%s" pack was not created, but a value for it was obtained.', env_name, pack), 'E')
+        logger.log(
+        string.format('The env-table "%s" of the "%s" pack was not created, but a value for it was obtained.', env_name,
+            pack), 'E')
         return
     end
 

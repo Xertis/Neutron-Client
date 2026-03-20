@@ -1,5 +1,5 @@
-local events = start_require "api/v2/events"
-local bson = require "lib/files/bson"
+local events = import "api/v2/events"
+local bson = import "lib/data/bson"
 
 local module = {
     emitter = {},

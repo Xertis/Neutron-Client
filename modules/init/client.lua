@@ -39,7 +39,7 @@ return function(app)
 
     table.insert_unique(CONTENT_PACKS, SHELL.prefix)
 
-    local Client = require "client:multiplayer/client/client"
+    local Client = import "client:net/client/client"
 
     local client = Client.new()
 

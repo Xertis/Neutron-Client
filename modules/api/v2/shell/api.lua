@@ -1,8 +1,8 @@
-require "client:init/requires"
-local connections = require "api/v2/shell/internal/connections"
-local packs = require "api/v2/shell/internal/packs"
+require "init/requires"
+local connections = import "api/v2/shell/internal/connections"
+local packs = import "api/v2/shell/internal/packs"
 
-local sandbox = require "api/v2/shell/extensions/sandbox"
+local sandbox = import "api/v2/shell/extensions/sandbox"
 
 local internal = {
     connections = connections,
@@ -22,7 +22,7 @@ local function parse_path(path)
     if index == nil then
         error("invalid path syntax (':' missing)")
     end
-    return string.sub(path, 1, index-1), string.sub(path, index+1, -1)
+    return string.sub(path, 1, index - 1), string.sub(path, index + 1, -1)
 end
 
 local meta = {
@@ -32,7 +32,8 @@ local meta = {
             return internal[key]
         end
 
-        return error("Only the shell has access to this system. To gain access to internal systems, you must register the pack as a shell")
+        return error(
+            "Only the shell has access to this system. To gain access to internal systems, you must register the pack as a shell")
     end
 }
 
@@ -58,7 +59,7 @@ function api.register_as_shell(config, module)
 end
 
 function internal.run(app)
-    require "init/client"(app)
+    import "init/client" (app)
 end
 
 setmetatable(api.internal, meta)

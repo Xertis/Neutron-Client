@@ -1,4 +1,4 @@
-local protocol = start_require "multiplayer/protocol-kernel/protocol"
+local protocol = import "net/protocol/protocol"
 
 local module = {
     blocks = {}
@@ -9,14 +9,14 @@ function module.blocks.sync_inventory(pos)
     local inv = inventory.get_inv(invid)
 
     SERVER:push_packet(protocol.ClientMsg.BlockInventory, {
-        pos = {x = pos.x, y = pos.y, z = pos.z},
+        pos = { x = pos.x, y = pos.y, z = pos.z },
         inventory = inv
     })
 end
 
 function module.blocks.sync_slot(pos, slot)
     SERVER:push_packet(protocol.ClientMsg.BlockInventorySlot, {
-        pos = {x = pos.x, y = pos.y, z = pos.z},
+        pos = { x = pos.x, y = pos.y, z = pos.z },
         slot_id = slot.slot_id,
         item_id = slot.item_id,
         item_count = slot.item_count
