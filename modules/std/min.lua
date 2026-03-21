@@ -1,13 +1,14 @@
 local data_buffer = import "lib/io/bit_buffer"
 
-_G['$Neutron'] = "client"
-_G['$Multiplayer'] = {
-    side = "client",
-    pack_id = "client",
-    api_references = {
-        Neutron = { "v1", "v2", latest = "v2" }
+if not _G['$Multiplayer'] then
+    _G['$Multiplayer'] = {
+        side = "client",
+        pack_id = "client",
+        api_references = {
+            Neutron = { "v1", "v2", latest = "v2" }
+        }
     }
-}
+end
 
 --- PLAYER
 
@@ -471,6 +472,18 @@ function table.checksum(data)
     process(data)
 
     return hash % uint24_mask
+end
+
+function table.deep_merge(t1, t2)
+    for k, v in pairs(t2) do
+        if type(v) == "table" and type(t1[k]) == "table" then
+            table.deep_merge(t1[k], v)
+        elseif t1[k] == nil then
+            t1[k] = v
+        end
+    end
+
+    return t1
 end
 
 --- MATH

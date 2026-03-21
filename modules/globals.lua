@@ -7,3 +7,4 @@ CLIENT_PLAYER = nil
 CLIENT = nil
 CLIENT_PID = nil
 SERVER = nil
+IS_REMOTE = true

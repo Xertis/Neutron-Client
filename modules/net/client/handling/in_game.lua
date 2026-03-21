@@ -10,9 +10,15 @@ local api_text3d = import "managers/text3d"
 local api_wraps = import "managers/wraps"
 
 local inventory_manager = import "managers/inventory"
-local handlers = {}
 
-handlers[protocol.ServerMsg.Disconnect] = function(server, packet)
+local self = Module({
+    [protocol.ServerMsg.SynchronizePlayer] = function() end
+})
+local shared = self.shared
+local remote = self.remote
+local single = self.single
+
+shared[protocol.ServerMsg.Disconnect] = function(server, packet)
     SHELL.module.handlers.game.on_disconnect(server, packet)
     CLIENT_PLAYER:set_slot(packet.slot, false)
     CLIENT:disconnect()
@@ -26,7 +32,7 @@ local function set_player_spawn_pos()
     CLIENT_PLAYER:set_slot(CACHED_DATA.slot, false)
 end
 
-handlers[protocol.ServerMsg.ChunkData] = function(server, packet)
+shared[protocol.ServerMsg.ChunkData] = function(server, packet)
     local chunk = packet.chunk
 
     world.set_chunk_data(chunk.x, chunk.z, chunk.data)
@@ -39,7 +45,7 @@ handlers[protocol.ServerMsg.ChunkData] = function(server, packet)
     end
 end
 
-handlers[protocol.ServerMsg.ChunksData] = function(server, packet)
+shared[protocol.ServerMsg.ChunksData] = function(server, packet)
     for _, chunk in ipairs(packet.list) do
         world.set_chunk_data(chunk.x, chunk.z, chunk.data)
         local pos = CACHED_DATA.pos
@@ -52,7 +58,7 @@ handlers[protocol.ServerMsg.ChunksData] = function(server, packet)
     end
 end
 
-handlers[protocol.ServerMsg.BlockChanged] = function(server, packet)
+shared[protocol.ServerMsg.BlockChanged] = function(server, packet)
     local pid = packet.pid
     local block_data = packet.block
     local block_pos = block_data.pos
@@ -74,15 +80,15 @@ handlers[protocol.ServerMsg.BlockChanged] = function(server, packet)
     block.set(block_pos.x, block_pos.y, block_pos.z, new_id, block_data.state, pid)
 end
 
-handlers[protocol.ServerMsg.TimeUpdate] = function(server, packet)
+shared[protocol.ServerMsg.TimeUpdate] = function(server, packet)
     world.set_day_time(packet.game_time)
 end
 
-handlers[protocol.ServerMsg.ChatMessage] = function(server, packet)
+shared[protocol.ServerMsg.ChatMessage] = function(server, packet)
     console.chat(packet.message)
 end
 
-handlers[protocol.ServerMsg.SynchronizePlayer] = function(server, packet)
+remote[protocol.ServerMsg.SynchronizePlayer] = function(server, packet)
     local player_data = packet.data
 
     CLIENT_PLAYER:set_pos(player_data.pos, false)
@@ -102,7 +108,7 @@ handlers[protocol.ServerMsg.SynchronizePlayer] = function(server, packet)
     end
 end
 
-handlers[protocol.ServerMsg.PlayerList] = function(server, packet)
+shared[protocol.ServerMsg.PlayerList] = function(server, packet)
     for _, _player in ipairs(packet.list) do
         local pid = _player.pid
         local name = _player.username
@@ -114,7 +120,7 @@ handlers[protocol.ServerMsg.PlayerList] = function(server, packet)
     end
 end
 
-handlers[protocol.ServerMsg.PlayerListRemove] = function(server, packet)
+shared[protocol.ServerMsg.PlayerListRemove] = function(server, packet)
     local player = PLAYER_LIST[packet.data.pid]
     if player then
         player:despawn()
@@ -122,7 +128,7 @@ handlers[protocol.ServerMsg.PlayerListRemove] = function(server, packet)
     end
 end
 
-handlers[protocol.ServerMsg.PlayerListAdd] = function(server, packet)
+shared[protocol.ServerMsg.PlayerListAdd] = function(server, packet)
     local pid = packet.data.pid
     local name = packet.data.username
     if CLIENT_PLAYER.pid ~= pid and not PLAYER_LIST[pid] then
@@ -133,7 +139,7 @@ handlers[protocol.ServerMsg.PlayerListAdd] = function(server, packet)
         local data = TEMP_PLAYERS[pid]
         if data then
             TEMP_PLAYERS[pid] = nil
-            handlers[protocol.ServerMsg.PlayerMoved](server, {
+            self[protocol.ServerMsg.PlayerMoved](server, {
                 pid = pid,
                 data = data
             })
@@ -141,7 +147,7 @@ handlers[protocol.ServerMsg.PlayerListAdd] = function(server, packet)
     end
 end
 
-handlers[protocol.ServerMsg.PlayerMoved] = function(server, packet)
+shared[protocol.ServerMsg.PlayerMoved] = function(server, packet)
     local player_obj = PLAYER_LIST[packet.pid]
 
     if not player_obj then
@@ -169,13 +175,13 @@ handlers[protocol.ServerMsg.PlayerMoved] = function(server, packet)
     player_obj:set_cheats(data.cheats)
 end
 
-handlers[protocol.ServerMsg.KeepAlive] = function(server, packet)
+shared[protocol.ServerMsg.KeepAlive] = function(server, packet)
     CLIENT_PLAYER.ping.last_upd = time.uptime()
 
     server:push_packet(protocol.ClientMsg.KeepAlive, { packet.challenge })
 end
 
-handlers[protocol.ServerMsg.InventorySync] = function(server, packet)
+shared[protocol.ServerMsg.InventorySync] = function(server, packet)
     inventory_manager.sync(packet.inventory_id, packet.inventory)
 
     if packet.inventory_id == 1 then
@@ -183,39 +189,39 @@ handlers[protocol.ServerMsg.InventorySync] = function(server, packet)
     end
 end
 
-handlers[protocol.ServerMsg.OpenBlockInventory] = function(server, packet)
+shared[protocol.ServerMsg.OpenBlockInventory] = function(server, packet)
     inventory_manager.open_block(packet.inventory_id, packet.pos)
 end
 
-handlers[protocol.ServerMsg.OpenVirtualInventory] = function(server, packet)
+shared[protocol.ServerMsg.OpenVirtualInventory] = function(server, packet)
     inventory_manager.open_virtual(packet.layout, packet.inventory_id, packet.disable_player_inventory)
 end
 
-handlers[protocol.ClientMsg.InventoryClose] = function(server, packet)
+shared[protocol.ClientMsg.InventoryClose] = function(server, packet)
     inventory_manager.close_inventory()
 end
 
-handlers[protocol.ServerMsg.PlayerHandSlot] = function(server, packet)
+shared[protocol.ServerMsg.PlayerHandSlot] = function(server, packet)
     player.set_selected_slot(hud.get_player(), packet.slot)
     CACHED_DATA.slot = packet.slot
 end
 
-handlers[protocol.ServerMsg.PlayerUsername] = function(server, packet)
+shared[protocol.ServerMsg.PlayerUsername] = function(server, packet)
     local player_obj = packet.pid ~= CLIENT_PLAYER.pid and PLAYER_LIST[packet.pid] or CLIENT_PLAYER
 
     player.set_name(packet.pid, packet.username)
     player_obj.name = packet.username
 end
 
-handlers[protocol.ServerMsg.PackEvent] = function(server, packet)
+shared[protocol.ServerMsg.PackEvent] = function(server, packet)
     api_events.__emit__(packet.pack, packet.event, packet.bytes)
 end
 
-handlers[protocol.ServerMsg.PackEnv] = function(server, packet)
+shared[protocol.ServerMsg.PackEnv] = function(server, packet)
     api_env.__env_update__(packet.pack, packet.env, packet.key, packet.value)
 end
 
-handlers[protocol.ServerMsg.WeatherChanged] = function(server, packet)
+shared[protocol.ServerMsg.WeatherChanged] = function(server, packet)
     local name = packet.name
     if name == '' then
         name = nil
@@ -228,80 +234,80 @@ handlers[protocol.ServerMsg.WeatherChanged] = function(server, packet)
     )
 end
 
-handlers[protocol.ServerMsg.PlayerFieldsUpdate] = function(server, packet)
+shared[protocol.ServerMsg.PlayerFieldsUpdate] = function(server, packet)
     api_entities.__update_player__(packet.pid, packet.dirty)
 end
 
-handlers[protocol.ServerMsg.EntityUpdate] = function(server, packet)
+shared[protocol.ServerMsg.EntityUpdate] = function(server, packet)
     api_entities.__emit__(packet.uid, packet.def, packet.dirty)
 end
 
-handlers[protocol.ServerMsg.EntityDespawn] = function(server, packet)
+shared[protocol.ServerMsg.EntityDespawn] = function(server, packet)
     api_entities.__despawn__(packet.uid)
 end
 
-handlers[protocol.ServerMsg.ParticleEmit] = function(server, packet)
+shared[protocol.ServerMsg.ParticleEmit] = function(server, packet)
     api_particles.emit(packet.particle)
 end
 
-handlers[protocol.ServerMsg.ParticleStop] = function(server, packet)
+shared[protocol.ServerMsg.ParticleStop] = function(server, packet)
     api_particles.stop(packet.pid)
 end
 
-handlers[protocol.ServerMsg.ParticleOrigin] = function(server, packet)
+shared[protocol.ServerMsg.ParticleOrigin] = function(server, packet)
     api_particles.set_origin(packet.origin)
 end
 
-handlers[protocol.ServerMsg.AudioEmit] = function(server, packet)
+shared[protocol.ServerMsg.AudioEmit] = function(server, packet)
     api_audio.emit(packet.audio)
 end
 
-handlers[protocol.ServerMsg.AudioStop] = function(server, packet)
+shared[protocol.ServerMsg.AudioStop] = function(server, packet)
     api_audio.stop(packet.id)
 end
 
-handlers[protocol.ServerMsg.AudioState] = function(server, packet)
+shared[protocol.ServerMsg.AudioState] = function(server, packet)
     api_audio.apply(packet.state)
 end
 
-handlers[protocol.ServerMsg.WrapShow] = function(server, packet)
+shared[protocol.ServerMsg.WrapShow] = function(server, packet)
     api_wraps.show(packet)
 end
 
-handlers[protocol.ServerMsg.WrapHide] = function(server, packet)
+shared[protocol.ServerMsg.WrapHide] = function(server, packet)
     api_wraps.hide(packet.id)
 end
 
-handlers[protocol.ServerMsg.WrapSetPos] = function(server, packet)
+shared[protocol.ServerMsg.WrapSetPos] = function(server, packet)
     api_wraps.set_pos(packet.id, packet.pos)
 end
 
-handlers[protocol.ServerMsg.WrapSetTexture] = function(server, packet)
+shared[protocol.ServerMsg.WrapSetTexture] = function(server, packet)
     api_wraps.set_texture(packet.id, packet.texture)
 end
 
-handlers[protocol.ServerMsg.WrapSetFaces] = function(server, packet)
+shared[protocol.ServerMsg.WrapSetFaces] = function(server, packet)
     api_wraps.set_faces(packet.id, packet.faces)
 end
 
-handlers[protocol.ServerMsg.WrapSetTints] = function(server, packet)
+shared[protocol.ServerMsg.WrapSetTints] = function(server, packet)
     api_wraps.set_tints(packet.id, packet.faces)
 end
 
 
-handlers[protocol.ServerMsg.Text3DShow] = function(server, packet)
+shared[protocol.ServerMsg.Text3DShow] = function(server, packet)
     api_text3d.show(packet.data)
 end
 
-handlers[protocol.ServerMsg.Text3DHide] = function(server, packet)
+shared[protocol.ServerMsg.Text3DHide] = function(server, packet)
     api_text3d.hide(packet.id)
 end
 
-handlers[protocol.ServerMsg.Text3DState] = function(server, packet)
+shared[protocol.ServerMsg.Text3DState] = function(server, packet)
     api_text3d.apply(packet.state)
 end
 
-handlers[protocol.ServerMsg.Text3DAxis] = function(server, packet)
+shared[protocol.ServerMsg.Text3DAxis] = function(server, packet)
     local state = {
         id = packet.id
     }
@@ -315,4 +321,4 @@ handlers[protocol.ServerMsg.Text3DAxis] = function(server, packet)
     api_text3d.apply(state)
 end
 
-return handlers
+return self:build()

@@ -33,6 +33,7 @@ function on_world_open()
 end
 
 function on_chunk_present(x, z)
+    if not IS_REMOTE then return end
     if #buffer < (external_app.get_setting("chunks.load-distance") ^ 2) / 2 then
         if not loaded_chunks[x .. '/' .. z] then
             table.insert(buffer, x)
@@ -47,6 +48,7 @@ function on_chunk_present(x, z)
 end
 
 function on_chunk_remove(x, z)
+    if not IS_REMOTE then return end
     loaded_chunks[x .. '/' .. z] = nil
 end
 
@@ -65,7 +67,7 @@ function on_world_tick()
         player.set_pos(CLIENT_PLAYER.pid, x, math.clamp(y, 0, 255), z)
     end
 
-    if not CACHED_DATA.over then
+    if not CACHED_DATA.over and IS_REMOTE then
         CLIENT_PLAYER:set_pos(CACHED_DATA.pos, false)
         CLIENT_PLAYER:set_rot(CACHED_DATA.rot, false)
         CLIENT_PLAYER:set_cheats(CACHED_DATA.cheats, false)
@@ -76,7 +78,7 @@ function on_world_tick()
         CLIENT_PLAYER:set_interaction_distance(CACHED_DATA.interaction_distance, false)
     end
 
-    if external_app.get_setting("chunks.load-distance") > CHUNK_LOADING_DISTANCE then
+    if IS_REMOTE and external_app.get_setting("chunks.load-distance") > CHUNK_LOADING_DISTANCE then
         external_app.set_setting("chunks.load-distance", CHUNK_LOADING_DISTANCE)
     end
 end
