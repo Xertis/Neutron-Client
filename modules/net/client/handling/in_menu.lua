@@ -130,7 +130,7 @@ single[protocol.ServerMsg.JoinSuccess] = function(server, packet)
     CHUNK_LOADING_DISTANCE = packet.chunks_loading_distance
     CLIENT_PID = packet.pid
 
-    --CLIENT_PLAYER = Player.new(CLIENT_PID, SHELL.module.states.get_username())
+    CLIENT_PLAYER = Player.new(CLIENT_PID, SHELL.module.states.get_username())
 
     for _, rule in ipairs(packet.rules) do
         rules.set(rule[1], rule[2])

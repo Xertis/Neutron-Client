@@ -12,8 +12,6 @@ local CLIENT_PLAYER = nil
 local CHUNK_LOADING_DISTANCE = nil
 
 function on_world_open()
-    local Player = import "net/classes/player"
-
     protocol = import "net/protocol/protocol"
     sandbox = import "managers/sandbox"
     inventory_manager = import "managers/inventory"
@@ -26,10 +24,13 @@ function on_world_open()
     SERVER = env.SERVER
     CHUNK_LOADING_DISTANCE = env.CHUNK_LOADING_DISTANCE
 
-    CLIENT_PLAYER = Player.new(env.CLIENT_PID, env.SHELL.module.states.get_username())
+    if IS_REMOTE then
+        local Player = import "net/classes/player"
+        CLIENT_PLAYER = Player.new(CLIENT_PID, SHELL.module.states.get_username())
+        env.CLIENT_PLAYER = CLIENT_PLAYER
+    end
 
-    env.CLIENT_PLAYER = CLIENT_PLAYER
-    env.SHELL.module.handlers.game.join(SERVER, CLIENT_PLAYER)
+    env.SHELL.module.handlers.game.join(SERVER, env.CLIENT_PLAYER)
 end
 
 function on_chunk_present(x, z)
@@ -57,6 +58,7 @@ function on_inventory_closed(invid)
 end
 
 function on_world_tick()
+    if not CLIENT_PLAYER then return end
     utils.__tick()
 
     CLIENT_PLAYER:tick()
