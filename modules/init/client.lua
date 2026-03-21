@@ -43,8 +43,6 @@ return function(app)
 
     local client = Client.new()
 
-    _G["/$p"] = table.copy(package.loaded)
-
     session.reset_entry("neutron-client-env")
     local env_meta = {
         __index = PACK_ENV,

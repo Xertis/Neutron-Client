@@ -77,8 +77,6 @@ function single.join(ip, id, identity, username, on_connect, on_disconnect)
             identity = SHELL.module.states.get_identity() or identity
             username = SHELL.module.states.get_username() or username
 
-            print(username, identity)
-
             buffer:put_packet(protocol.build_packet("client", protocol.ClientMsg.JoinGame, {
                 username = username,
                 identity = identity

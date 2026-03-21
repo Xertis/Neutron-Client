@@ -12,7 +12,9 @@ local api_wraps = import "managers/wraps"
 local inventory_manager = import "managers/inventory"
 
 local self = Module({
-    [protocol.ServerMsg.SynchronizePlayer] = function() end
+    [protocol.ServerMsg.SynchronizePlayer] = function() end,
+    [protocol.ServerMsg.ChunkData] = function() end,
+    [protocol.ServerMsg.ChunksData] = function() end
 })
 local shared = self.shared
 local remote = self.remote
@@ -32,7 +34,7 @@ local function set_player_spawn_pos()
     CLIENT_PLAYER:set_slot(CACHED_DATA.slot, false)
 end
 
-shared[protocol.ServerMsg.ChunkData] = function(server, packet)
+remote[protocol.ServerMsg.ChunkData] = function(server, packet)
     local chunk = packet.chunk
 
     world.set_chunk_data(chunk.x, chunk.z, chunk.data)
@@ -45,7 +47,7 @@ shared[protocol.ServerMsg.ChunkData] = function(server, packet)
     end
 end
 
-shared[protocol.ServerMsg.ChunksData] = function(server, packet)
+remote[protocol.ServerMsg.ChunksData] = function(server, packet)
     for _, chunk in ipairs(packet.list) do
         world.set_chunk_data(chunk.x, chunk.z, chunk.data)
         local pos = CACHED_DATA.pos
@@ -131,6 +133,7 @@ end
 shared[protocol.ServerMsg.PlayerListAdd] = function(server, packet)
     local pid = packet.data.pid
     local name = packet.data.username
+
     if CLIENT_PLAYER.pid ~= pid and not PLAYER_LIST[pid] then
         player.create(name, pid)
         player.set_loading_chunks(pid, false)
