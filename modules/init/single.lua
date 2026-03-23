@@ -29,7 +29,7 @@ return function()
 
     local client = Client.new()
 
-    session.reset_entry("neutron-client-env")
+    session.reset("neutron-client-env")
     local env_meta = {
         __index = PACK_ENV,
         __newindex = function(t, key, value)
@@ -37,10 +37,12 @@ return function()
         end
     }
 
-    setmetatable(session.get_entry("neutron-client-env"), env_meta)
+    setmetatable(session.get("neutron-client-env"), env_meta)
 
-    events.on("client:.worldtick", function()
-        client:tick()
+    events.on("server:content_loaded", function()
+        events.on("server:main_tick", function()
+            client:tick()
+        end)
     end)
 
     return create_stub()

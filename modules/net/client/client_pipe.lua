@@ -56,7 +56,7 @@ ClientPipe:add_middleware(function(server)
         local success, err = pcall(function()
             if server.state ~= protocol.States.Active then
                 in_menu_handlers[packet.packet_type](server, packet)
-            elseif server.state == protocol.States.Active then
+            elseif server.state == protocol.States.Active and hud then
                 in_game_handlers[packet.packet_type](server, packet)
             end
         end)

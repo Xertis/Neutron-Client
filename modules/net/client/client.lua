@@ -1,6 +1,7 @@
 local Server = import "net/classes/server"
 local protocol = import "net/protocol/protocol"
 local Client_pipe = import "net/client/client_pipe"
+local Network = import "net/classes/network"
 
 local Client = {}
 Client.__index = Client
@@ -9,7 +10,7 @@ function Client.new()
     local self = setmetatable({}, Client)
 
     self.servers = {}
-    self.socket = nil
+    self.network = nil
     self.main_server = nil
 
     CLIENT = self
@@ -18,8 +19,9 @@ function Client.new()
 end
 
 function Client:connect(address, port, name, state, id, meta)
-    local server = Server.new(false, socket, address, port, name)
-    self.socket = network.tcp_connect(address, tonumber(port), function(socket)
+    local server = Server.new(false, nil, address, port, name)
+
+    self.network = Network.new("client", function(socket)
         server.connecting = false
         server.state = state or -1
         server.socket = socket
@@ -35,6 +37,41 @@ function Client:connect(address, port, name, state, id, meta)
             meta.on_disconnect(server, err)
         end
     end)
+
+    self.network:tcp_connect(address, tonumber(port))
+
+    table.merge(server.meta, meta)
+
+    if id then
+        server.id = id
+    end
+
+    table.insert(self.servers, server)
+
+    return server
+end
+
+function Client:virtual_connect(address, port, name, state, id, meta)
+    local server = Server.new(false, nil, address, port, name)
+
+    self.network = Network.new("client", function(socket)
+        server.connecting = false
+        server.state = state or -1
+        server.socket = socket
+
+        socket:set_nodelay(true)
+
+        if meta.on_connect then
+            meta.on_connect(server)
+        end
+    end, function(_, err)
+        server.connecting = false
+        if meta.on_disconnect then
+            meta.on_disconnect(server, err)
+        end
+    end)
+
+    self.network:virtual_connect()
 
     table.merge(server.meta, meta)
 

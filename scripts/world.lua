@@ -19,7 +19,7 @@ function on_world_open()
 
     import "init/cmd"
     -------------------------
-    local env = session.get_entry("neutron-client-env")
+    local env = session.get("neutron-client-env")
     CACHED_DATA = env.CACHED_DATA
     SERVER = env.SERVER
     CHUNK_LOADING_DISTANCE = env.CHUNK_LOADING_DISTANCE
@@ -31,6 +31,7 @@ function on_world_open()
     end
 
     env.SHELL.module.handlers.game.join(SERVER, env.CLIENT_PLAYER)
+    CLIENT_PLAYER = env.CLIENT_PLAYER
 end
 
 function on_chunk_present(x, z)

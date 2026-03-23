@@ -56,7 +56,7 @@ end
 
 function single.join(ip, id, identity, username, on_connect, on_disconnect)
     local address, port = string.split_ip(ip)
-    CLIENT:connect(address, port, "main", protocol.States.Login, id, {
+    CLIENT:virtual_connect(address, port, "main", protocol.States.Login, id, {
         on_connect = function(server)
             on_connect(server)
             local buffer = protocol.create_databuffer()
