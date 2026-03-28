@@ -162,14 +162,7 @@ shared[protocol.ServerMsg.PlayerMoved] = function(server, packet)
 
     local data = packet.data
 
-    if data.pos and data.compressed then
-        local x, y, z = player_obj.pos.x, player_obj.pos.y, player_obj.pos.z
-        player_obj:set_pos({
-            x = x + data.pos.x,
-            y = y + data.pos.y,
-            z = z + data.pos.z
-        })
-    elseif data.pos then
+    if data.pos then
         player_obj:set_pos(data.pos)
     end
 

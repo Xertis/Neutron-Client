@@ -1,10 +1,14 @@
 local protocol = import "net/protocol/protocol"
 
-local module = {}
 local entities_uids = {}
 local entities_components = {}
 local handlers = {}
 local desynced_entities = {}
+
+local self = Module()
+local shared = self.shared
+local single = self.single
+local remote = self.remote
 
 local PLAYER_ENTITY_ID = nil
 
@@ -30,21 +34,21 @@ entities.spawn = function(name, ...)
     return entity
 end
 
-function module.desync(name)
+function shared.desync(name)
     desynced_entities[name] = true
 end
 
-function module.sync(name)
+function shared.sync(name)
     desynced_entities[name] = nil
 end
 
-function module.set_handler(triggers, handler)
+function shared.set_handler(triggers, handler)
     for _, trigger in ipairs(triggers) do
         handlers[trigger] = handler
     end
 end
 
-function module.__despawn__(uid)
+function shared.__despawn__(uid)
     local cuid = entities_uids[uid]
     if not cuid then return end
 
@@ -65,7 +69,7 @@ local function call_component(entity, fields)
     end
 end
 
-local function update(cuid, def, dirty)
+function remote.__update(cuid, def, dirty)
     local std_fields = dirty.standard_fields or {}
     local entity = entities.get(cuid)
     if not entity then return end
@@ -129,20 +133,31 @@ local function update(cuid, def, dirty)
     if std_fields.body_size then rigidbody:set_size(std_fields.body_size) end
 end
 
-function module.__get_uids__()
+function single.__update(cuid, def, dirty)
+    local entity = entities.get(cuid)
+    if not entity then return end
+
+    call_component(entity, dirty.custom_fields or {})
+
+    if handlers[def] then
+        handlers[def](cuid, def, dirty.custom_fields or {})
+    end
+end
+
+function shared.__get_uids__()
     return entities_uids
 end
 
-function module.__update_player__(pid, dirty)
+function shared.__update_player__(pid, dirty)
     if not PLAYER_ENTITY_ID then
         local player_entity = entities.get(player.get_entity(hud.get_player()))
 
         PLAYER_ENTITY_ID = player_entity:def_index()
     end
-    update(player.get_entity(pid), PLAYER_ENTITY_ID, dirty)
+    self.__update(player.get_entity(pid), PLAYER_ENTITY_ID, dirty)
 end
 
-function module.__emit__(uid, def, dirty)
+function shared.__emit__(uid, def, dirty)
     local std_fields = dirty.standard_fields or {}
 
     if not entities_uids[uid] then
@@ -163,7 +178,7 @@ function module.__emit__(uid, def, dirty)
     end
 
     local cuid = entities_uids[uid]
-    update(cuid, def, dirty)
+    self.__update(cuid, def, dirty)
 end
 
-return module
+return self:build()
