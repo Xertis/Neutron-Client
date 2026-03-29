@@ -1,7 +1,7 @@
 {
   "id": "client",
   "title": "Neutron - Client",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Client for the server core",
   "creators": [
     "Xertis",
