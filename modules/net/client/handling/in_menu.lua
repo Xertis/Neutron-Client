@@ -119,6 +119,8 @@ remote[protocol.ServerMsg.JoinSuccess] = function(server, packet)
     for _, rule in ipairs(packet.rules) do
         rules.set(rule[1], rule[2])
     end
+
+    external_app.tick()
 end
 
 single[protocol.ServerMsg.JoinSuccess] = function(server, packet)

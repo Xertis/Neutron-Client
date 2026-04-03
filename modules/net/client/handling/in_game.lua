@@ -1,5 +1,4 @@
 local protocol = import "net/protocol/protocol"
-local Player = import "net/classes/player"
 
 local api_events = import "api/v2/events"
 local api_entities = import "api/v2/entities"
@@ -110,66 +109,26 @@ remote[protocol.ServerMsg.SynchronizePlayer] = function(server, packet)
     end
 end
 
-shared[protocol.ServerMsg.PlayerList] = function(server, packet)
-    for _, _player in ipairs(packet.list) do
-        local pid = _player.pid
-        local name = _player.username
-        if CLIENT_PLAYER.pid ~= pid then
-            player.create(name, pid)
-            player.set_loading_chunks(pid, false)
-            PLAYER_LIST[pid] = Player.new(pid, name)
-        end
-    end
-end
+-- shared[protocol.ServerMsg.PlayerMoved] = function(server, packet)
+--     local player_obj = PLAYER_LIST[packet.pid]
 
-shared[protocol.ServerMsg.PlayerListRemove] = function(server, packet)
-    local player = PLAYER_LIST[packet.data.pid]
-    if player then
-        player:despawn()
-        PLAYER_LIST[packet.data.pid] = nil
-    end
-end
+--     if not player_obj then
+--         TEMP_PLAYERS[packet.pid] = packet.data
+--         return
+--     end
 
-shared[protocol.ServerMsg.PlayerListAdd] = function(server, packet)
-    local pid = packet.data.pid
-    local name = packet.data.username
+--     if packet.pid == CLIENT_PLAYER.pid then return end
 
-    if CLIENT_PLAYER.pid ~= pid and not PLAYER_LIST[pid] then
-        player.create(name, pid)
-        player.set_loading_chunks(pid, false)
-        PLAYER_LIST[pid] = Player.new(pid, name)
+--     local data = packet.data
 
-        local data = TEMP_PLAYERS[pid]
-        if data then
-            TEMP_PLAYERS[pid] = nil
-            self[protocol.ServerMsg.PlayerMoved](server, {
-                pid = pid,
-                data = data
-            })
-        end
-    end
-end
+--     if data.pos then
+--         player_obj:set_pos(data.pos)
+--     end
 
-shared[protocol.ServerMsg.PlayerMoved] = function(server, packet)
-    local player_obj = PLAYER_LIST[packet.pid]
-
-    if not player_obj then
-        TEMP_PLAYERS[packet.pid] = packet.data
-        return
-    end
-
-    if packet.pid == CLIENT_PLAYER.pid then return end
-
-    local data = packet.data
-
-    if data.pos then
-        player_obj:set_pos(data.pos)
-    end
-
-    player_obj:set_hand_item(data.hand_item)
-    player_obj:set_rot(data.rot)
-    player_obj:set_cheats(data.cheats)
-end
+--     player_obj:set_hand_item(data.hand_item)
+--     player_obj:set_rot(data.rot)
+--     player_obj:set_cheats(data.cheats)
+-- end
 
 shared[protocol.ServerMsg.KeepAlive] = function(server, packet)
     CLIENT_PLAYER.ping.last_upd = time.uptime()
@@ -193,20 +152,13 @@ shared[protocol.ServerMsg.OpenVirtualInventory] = function(server, packet)
     inventory_manager.open_virtual(packet.layout, packet.inventory_id, packet.disable_player_inventory)
 end
 
-shared[protocol.ClientMsg.InventoryClose] = function(server, packet)
+shared[protocol.ServerMsg.InventoryClose] = function(server, packet)
     inventory_manager.close_inventory()
 end
 
 shared[protocol.ServerMsg.PlayerHandSlot] = function(server, packet)
     player.set_selected_slot(hud.get_player(), packet.slot)
     CACHED_DATA.slot = packet.slot
-end
-
-shared[protocol.ServerMsg.PlayerUsername] = function(server, packet)
-    local player_obj = packet.pid ~= CLIENT_PLAYER.pid and PLAYER_LIST[packet.pid] or CLIENT_PLAYER
-
-    player.set_name(packet.pid, packet.username)
-    player_obj.name = packet.username
 end
 
 shared[protocol.ServerMsg.PackEvent] = function(server, packet)
@@ -228,10 +180,6 @@ shared[protocol.ServerMsg.WeatherChanged] = function(server, packet)
         packet.time,
         name
     )
-end
-
-shared[protocol.ServerMsg.PlayerFieldsUpdate] = function(server, packet)
-    api_entities.__update_player__(packet.pid, packet.dirty)
 end
 
 shared[protocol.ServerMsg.EntityUpdate] = function(server, packet)
