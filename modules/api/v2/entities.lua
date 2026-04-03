@@ -55,14 +55,15 @@ function shared.__despawn__(uid)
 
     entities_uids[uid] = nil
     local entity = entities.get(cuid)
-    local pid = entity:get_player()
-
-    if entity and not pid or pid == -1 then
-        entity:despawn()
-    elseif entity then
-        local player = PLAYER_LIST[pid]
-        player:despawn()
-        PLAYER_LIST[pid] = nil
+    if entity then
+        local pid = entity:get_player()
+        if not pid or pid == -1 then
+            entity:despawn()
+        else
+            local player = PLAYER_LIST[pid]
+            player:despawn()
+            PLAYER_LIST[pid] = nil
+        end
     end
 
     components_manager.clean_component(cuid)
