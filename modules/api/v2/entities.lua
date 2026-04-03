@@ -57,7 +57,7 @@ function shared.__despawn__(uid)
     local entity = entities.get(cuid)
     local pid = entity:get_player()
 
-    if entity and not pid then
+    if entity and not pid or pid == -1 then
         entity:despawn()
     elseif entity then
         local player = PLAYER_LIST[pid]
