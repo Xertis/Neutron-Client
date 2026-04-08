@@ -165,7 +165,6 @@ function shared.__emit__(uid, def, dirty)
             components_manager.wrap_components(new_entity, uid)
             self.__update(entities_uids[uid], def, dirty)
         else
-            debug.print(dirty)
             player.create(custom_fields.name, custom_fields.pid)
             player.set_loading_chunks(custom_fields.pid, false)
             PLAYER_LIST[custom_fields.pid] = Player.new(custom_fields.pid, custom_fields.name)
