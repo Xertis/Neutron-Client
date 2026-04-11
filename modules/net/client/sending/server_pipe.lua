@@ -6,7 +6,6 @@ local ServerPipe = Pipeline.new()
 
 --А мы вообще норм?
 ServerPipe:add_middleware(function(server)
-    if not CACHED_DATA.over then return end
     return server
 end)
 

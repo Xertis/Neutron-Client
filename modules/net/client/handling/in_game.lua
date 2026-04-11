@@ -25,37 +25,15 @@ shared[protocol.ServerMsg.Disconnect] = function(server, packet)
     CLIENT:disconnect()
 end
 
-local function set_player_spawn_pos()
-    CLIENT_PLAYER:set_pos(CACHED_DATA.pos, false)
-    CLIENT_PLAYER:set_rot(CACHED_DATA.rot, false)
-    CLIENT_PLAYER:set_cheats(CACHED_DATA.cheats, false)
-    CLIENT_PLAYER:set_inventory(CACHED_DATA.inv, false)
-    CLIENT_PLAYER:set_slot(CACHED_DATA.slot, false)
-end
-
 remote[protocol.ServerMsg.ChunkData] = function(server, packet)
     local chunk = packet.chunk
 
     world.set_chunk_data(chunk.x, chunk.z, chunk.data)
-    local pos = CACHED_DATA.pos
-    if not CACHED_DATA.over and pos then return end
-
-    if math.floor(pos.x / 16) == chunk.x and math.floor(pos.z / 16) == chunk.z then
-        CACHED_DATA.over = true
-        set_player_spawn_pos()
-    end
 end
 
 remote[protocol.ServerMsg.ChunksData] = function(server, packet)
     for _, chunk in ipairs(packet.list) do
         world.set_chunk_data(chunk.x, chunk.z, chunk.data)
-        local pos = CACHED_DATA.pos
-        if pos and not CACHED_DATA.over then
-            if math.floor(pos.x / 16) == chunk.x and math.floor(pos.z / 16) == chunk.z then
-                CACHED_DATA.over = true
-                set_player_spawn_pos()
-            end
-        end
     end
 end
 
@@ -98,15 +76,6 @@ remote[protocol.ServerMsg.SynchronizePlayer] = function(server, packet)
     CLIENT_PLAYER:set_infinite_items(player_data.infinite_items, false)
     CLIENT_PLAYER:set_instant_destruction(player_data.instant_destruction, false)
     CLIENT_PLAYER:set_interaction_distance(player_data.interaction_distance, false)
-
-    if not CACHED_DATA.over then
-        CACHED_DATA.pos = player_data.pos
-        CACHED_DATA.rot = player_data.rot
-        CACHED_DATA.cheats = player_data.cheats
-        CACHED_DATA.infinite_items = player_data.infinite_items
-        CACHED_DATA.instant_destruction = player_data.instant_destruction
-        CACHED_DATA.interaction_distance = player_data.interaction_distance
-    end
 end
 
 -- shared[protocol.ServerMsg.PlayerMoved] = function(server, packet)
@@ -138,10 +107,6 @@ end
 
 shared[protocol.ServerMsg.InventorySync] = function(server, packet)
     inventory_manager.sync(packet.inventory_id, packet.inventory)
-
-    if packet.inventory_id == 1 then
-        CACHED_DATA.inv = packet.inventory
-    end
 end
 
 shared[protocol.ServerMsg.OpenBlockInventory] = function(server, packet)
@@ -158,7 +123,6 @@ end
 
 shared[protocol.ServerMsg.PlayerHandSlot] = function(server, packet)
     player.set_selected_slot(hud.get_player(), packet.slot)
-    CACHED_DATA.slot = packet.slot
 end
 
 shared[protocol.ServerMsg.PackEvent] = function(server, packet)

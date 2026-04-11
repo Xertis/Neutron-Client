@@ -293,8 +293,6 @@ function Player:__check_interaction_distance()
 end
 
 function Player:__check_pos()
-    if not CACHED_DATA.over then return end
-
     local x, y, z = player.get_pos(self.pid)
     if math.euclidian3D(self.pos.x, self.pos.y, self.pos.z, x, y, z) > 0.05 then
         self.pos = { x = x, y = y, z = z }

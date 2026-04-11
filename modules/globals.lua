@@ -1,5 +1,4 @@
 CONTENT_PACKS = { PACK_ID }
-CACHED_DATA = { over = false }
 
 PLAYER_LIST = {}
 TEMP_PLAYERS = {}
