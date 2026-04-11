@@ -114,12 +114,28 @@ remote[protocol.ServerMsg.JoinSuccess] = function(server, packet)
     CHUNK_LOADING_DISTANCE = packet.chunks_loading_distance
     CLIENT_PID = packet.pid
 
-    external_app.new_world("", "41530140565755", PACK_ID .. ":void", packet.pid)
+    external_app.new_world("", "41530140565755", PACK_ID .. ":void", CLIENT_PID)
 
     for _, rule in ipairs(packet.rules) do
         rules.set(rule[1], rule[2])
     end
 
+    debug.print(packet.player)
+
+    local player_data = packet.player
+    local pos = player_data.pos
+    local rot = player_data.rot
+    local cheats = player_data.cheats
+    player.set_spawnpoint(CLIENT_PID, pos.x, pos.y, pos.z)
+
+    player.set_pos(CLIENT_PID, pos.x, pos.y, pos.z)
+    player.set_rot(CLIENT_PID, rot.x, rot.y, rot.z)
+    player.set_noclip(CLIENT_PID, cheats.noclip)
+    player.set_noclip(CLIENT_PID, cheats.flight)
+
+    player.set_infinite_items(CLIENT_PID, player_data.infinite_items)
+    player.set_instant_destruction(CLIENT_PID, player_data.instant_destruction)
+    player.set_interaction_distance(CLIENT_PID, player_data.interaction_distance)
     external_app.tick()
 end
 
