@@ -120,8 +120,6 @@ remote[protocol.ServerMsg.JoinSuccess] = function(server, packet)
         rules.set(rule[1], rule[2])
     end
 
-    debug.print(packet.player)
-
     local player_data = packet.player
     local pos = player_data.pos
     local rot = player_data.rot
