@@ -124,12 +124,13 @@ remote[protocol.ServerMsg.JoinSuccess] = function(server, packet)
     local pos = player_data.pos
     local rot = player_data.rot
     local cheats = player_data.cheats
+
     player.set_spawnpoint(CLIENT_PID, pos.x, pos.y, pos.z)
 
     player.set_pos(CLIENT_PID, pos.x, pos.y, pos.z)
     player.set_rot(CLIENT_PID, rot.x, rot.y, rot.z)
     player.set_noclip(CLIENT_PID, cheats.noclip)
-    player.set_noclip(CLIENT_PID, cheats.flight)
+    player.set_flight(CLIENT_PID, cheats.flight)
 
     player.set_infinite_items(CLIENT_PID, player_data.infinite_items)
     player.set_instant_destruction(CLIENT_PID, player_data.instant_destruction)

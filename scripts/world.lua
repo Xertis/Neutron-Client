@@ -2,6 +2,7 @@ local protocol = nil
 local sandbox = nil
 local utils = nil
 local inventory_manager = nil
+local entities_manager = nil
 
 local buffer = {}
 local loaded_chunks = {}
@@ -14,6 +15,7 @@ function on_world_open()
     protocol = import "net/protocol/protocol"
     sandbox = import "managers/sandbox"
     inventory_manager = import "managers/inventory"
+    entities_manager = import "api/v2/entities"
     utils = import "lib/utils/utils"
 
     import "init/cmd"
@@ -96,4 +98,12 @@ function on_block_interact(blockid, x, y, z, playerid)
 
     x, y, z = block.seek_origin(x, y, z)
     sandbox.on_interact(blockid, x, y, z)
+end
+
+function on_entity_spawn(uid)
+    entities_manager.__world_spawn(uid)
+end
+
+function on_entity_despawn(uid)
+    entities_manager.__world_despawn(uid)
 end

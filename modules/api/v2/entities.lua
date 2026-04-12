@@ -3,8 +3,12 @@ local components_manager = import "managers/components"
 local Player = import "net/classes/player"
 
 local entities_uids = {}
+local entities_cuids = {}
+
 local handlers = {}
 local desynced_entities = {}
+
+local despawned = {}
 
 local self = Module()
 local shared = self.shared
@@ -35,6 +39,27 @@ entities.spawn = function(name, ...)
     return entity
 end
 
+function shared.__world_spawn(cuid)
+    if despawned[cuid] then
+        local entity = entities.get(cuid)
+        entity:despawn()
+        despawned[cuid] = nil
+    end
+end
+
+function shared.__world_despawn(cuid)
+    local uid = entities_cuids[cuid]
+    if not uid then return end
+
+    SERVER:push_packet(protocol.ClientMsg.EntityDespawn, { uid = uid })
+
+    entities_cuids[cuid] = nil
+    entities_uids[uid] = nil
+    despawned[cuid] = true
+
+    components_manager.clean_component(cuid)
+end
+
 function shared.desync(name)
     desynced_entities[name] = true
 end
@@ -54,6 +79,7 @@ function shared.__despawn__(uid)
     if not cuid then return end
 
     entities_uids[uid] = nil
+    entities_cuids[cuid] = nil
     local entity = entities.get(cuid)
     if entity then
         local pid = entity:get_player()
@@ -66,6 +92,7 @@ function shared.__despawn__(uid)
         end
     end
 
+    despawned[cuid] = nil
     components_manager.clean_component(cuid)
 end
 
@@ -163,7 +190,6 @@ function shared.__emit__(uid, def, dirty)
                 new_entity.rigidbody:set_gravity_scale(vec_zero())
             end
             components_manager.wrap_components(new_entity, uid)
-            self.__update(entities_uids[uid], def, dirty)
         else
             player.create(custom_fields.name, custom_fields.pid)
             player.set_loading_chunks(custom_fields.pid, false)
@@ -178,11 +204,10 @@ function shared.__emit__(uid, def, dirty)
                 player_entity.rigidbody:set_gravity_scale(vec_zero())
             end
             components_manager.wrap_components(player_entity, uid)
-            self.__update(entities_uids[uid], def, dirty)
         end
-        return
     end
     local cuid = entities_uids[uid]
+    entities_cuids[cuid] = uid
     self.__update(cuid, def, dirty)
 end
 

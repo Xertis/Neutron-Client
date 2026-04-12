@@ -16,7 +16,10 @@ local function wrap_components(components, entity)
     }
 
     for component_name, component in pairs(components) do
-        module.set_component_state(uid, component_name, true)
+        local state = get_component_state(uid, component_name)
+        if state == nil then state = true end
+
+        module.set_component_state(uid, component_name, state)
         for key, val in pairs(component) do
             if type(val) ~= "function" or component_name == "client:controller" then goto continue end
 
