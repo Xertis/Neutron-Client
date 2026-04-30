@@ -78,6 +78,18 @@ PlayerHandSlot:
   fields:
     - slot: uint8
 
+OnlinePlayersList:
+  fields:
+    - list: Array<Pair<string, var>>
+
+OnlinePlayersListAdd:
+  fields:
+    - data: Pair<string, var>
+
+OnlinePlayersListRemove:
+  fields:
+    - pid: var
+
 OpenVirtualInventory:
   fields:
     - layout: string
@@ -131,10 +143,16 @@ PackEnv:
     - key: string
     - value: any
 
-EntityUpdate:
+EntitySpawn:
   fields:
     - uid: var
     - def: uint16
+    - dirty: Edd
+    - args: NullAble<bson>
+
+EntityUpdate:
+  fields:
+    - uid: var
     - dirty: Edd
 
 EntityDespawn:
@@ -147,7 +165,8 @@ ParticleEmit:
 
 ParticleOrigin:
   fields:
-    - origin: particle_origin
+    - pid: var
+    - origin: origin
 
 ParticleStop:
   fields:
@@ -167,12 +186,21 @@ AudioStop:
 
 Text3DShow:
   fields:
-    - data: bson
+    - data: Text3D
+
+Text3DPos:
+  fields:
+    - id: var
+    - pos: Vec3<f32>
+
+Text3DEntity:
+  fields:
+    - id: var
+    - entity: var[W and W+1 or 0][R-1]
 
 Text3DState:
   fields:
-    - state: bson
-
+    - state: Text3D
 Text3DAxis:
   fields:
     - id: var

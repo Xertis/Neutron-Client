@@ -39,10 +39,16 @@ entities.spawn = function(name, ...)
     return entity
 end
 
+local function __despawn(cuid)
+    local entity = entities.get(cuid)
+    if entity then
+        entity:despawn()
+    end
+end
+
 function shared.__world_spawn(cuid)
     if despawned[cuid] then
-        local entity = entities.get(cuid)
-        entity:despawn()
+        __despawn(cuid)
         despawned[cuid] = nil
     end
 end
@@ -80,17 +86,7 @@ function shared.__despawn__(uid)
 
     entities_uids[uid] = nil
     entities_cuids[cuid] = nil
-    local entity = entities.get(cuid)
-    if entity then
-        local pid = entity:get_player()
-        if not pid or pid == -1 then
-            entity:despawn()
-        else
-            local player = PLAYER_LIST[pid]
-            player:despawn()
-            PLAYER_LIST[pid] = nil
-        end
-    end
+    __despawn(cuid)
 
     despawned[cuid] = nil
     components_manager.clean_component(cuid)
@@ -123,6 +119,11 @@ function remote.__update(cuid, def, dirty)
         end
     end
 
+    local controller = nil
+    if entity:has_component("client:controller") then
+        controller = entity:require_component("client:controller")
+    end
+
     local skeleton = entity.skeleton
 
     if skeleton then
@@ -133,18 +134,15 @@ function remote.__update(cuid, def, dirty)
             skeleton:set_model(tonumber(key), val)
         end
         for key, val in pairs(dirty.matrix or {}) do
-            skeleton:set_matrix(tonumber(key), val)
+            if controller then
+                controller.set_transform_matrix(key, val)
+            end
         end
     end
 
 
     local transform = entity.transform
     local rigidbody = entity.rigidbody
-
-    local controller = nil
-    if entity:has_component("client:controller") then
-        controller = entity:require_component("client:controller")
-    end
 
     if std_fields.tsf_pos and controller then controller.set_pos(std_fields.tsf_pos) end
     if std_fields.tsf_rot and controller then controller.set_rot(std_fields.tsf_rot) end
@@ -171,44 +169,37 @@ function shared.__get_uids__()
     return entities_uids
 end
 
-function shared.__emit__(uid, def, dirty)
+function shared.__spawn__(uid, def, dirty, args)
+    local std_fields = dirty.standard_fields or {}
+
+    if not entities_uids[uid] then
+        local entity_name = entities.def_name(def)
+        local new_entity = nil
+        new_entity = original_spawn(entity_name, std_fields.tsf_pos or vec_zero(), args)
+        entities_uids[uid] = new_entity:get_uid()
+        if new_entity.rigidbody then
+            new_entity.rigidbody:set_gravity_scale(vec_zero())
+            new_entity.rigidbody:set_body_type("kinematic")
+        end
+        components_manager.wrap_components(new_entity, uid)
+    end
+
+    local cuid = entities_uids[uid]
+    entities_cuids[cuid] = uid
+
+    self.__emit__(uid, dirty)
+end
+
+function shared.__emit__(uid, dirty)
     if not PLAYER_ENTITY_ID then
         local player_entity = entities.get(player.get_entity(hud.get_player()))
         PLAYER_ENTITY_ID = player_entity:def_index()
     end
 
-    local std_fields = dirty.standard_fields or {}
-    local custom_fields = dirty.custom_fields or {}
-
-    if not entities_uids[uid] then
-        local entity_name = entities.def_name(def)
-        local new_entity = nil
-        if def ~= PLAYER_ENTITY_ID then
-            new_entity = original_spawn(entity_name, std_fields.tsf_pos or vec_zero())
-            entities_uids[uid] = new_entity:get_uid()
-            if new_entity.rigidbody then
-                new_entity.rigidbody:set_gravity_scale(vec_zero())
-            end
-            components_manager.wrap_components(new_entity, uid)
-        else
-            player.create(custom_fields.name, custom_fields.pid)
-            player.set_loading_chunks(custom_fields.pid, false)
-            PLAYER_LIST[custom_fields.pid] = Player.new(custom_fields.pid, custom_fields.name)
-            external_app.tick()
-
-            local player_entity = entities.get(player.get_entity(custom_fields.pid))
-            entities_uids[uid] = player_entity:get_uid()
-            player.set_flight(custom_fields.pid, true)
-            player.set_noclip(custom_fields.pid, true)
-            if player_entity.rigidbody then
-                player_entity.rigidbody:set_gravity_scale(vec_zero())
-            end
-            components_manager.wrap_components(player_entity, uid)
-        end
-    end
     local cuid = entities_uids[uid]
-    entities_cuids[cuid] = uid
-    self.__update(cuid, def, dirty)
+    if not cuid then return end
+
+    self.__update(cuid, entities.get(cuid):def_index(), dirty)
 end
 
 return self:build()

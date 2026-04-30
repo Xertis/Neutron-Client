@@ -24,7 +24,7 @@ function protocol.build_packet(client_or_server, packet_type, data)
     local state, res = pcall(kernel.write, buffer, client_or_server, kernel[client_or_server].ids[packet_type], data)
 
     if not state then
-        logger.log("Packet encoding crash, additional information in server.log", 'E')
+        logger.log("Packet encoding crash, additional information in client.log", 'E')
 
         logger.log("Error: " .. res, 'E', true)
 
@@ -53,7 +53,7 @@ function protocol.parse_packet(client_or_server, external_buffer)
     local state, res = pcall(kernel.read, buffer, client_or_server, kernel[client_or_server].ids[packet_type])
 
     if not state then
-        logger.log("Packet parsing crash, additional information in server.log", 'E')
+        logger.log("Packet parsing crash, additional information in client.log", 'E')
 
         logger.log("Error: " .. res, 'E', true)
 

@@ -1,6 +1,33 @@
+local entities = import "api/v2/entities"
+local utils = import "lib/utils/utils"
+
+local uids = entities.__get_uids__()
+
 local module = {}
 
 local TEXTS_IDS = {}
+
+local function apply_entity(text)
+    local id = TEXTS_IDS[text.id]
+    if text.entity == -1 then
+        gfx.text3d.set_entity(id, nil)
+    else
+        local entity = uids[text.entity]
+        if entity then
+            gfx.text3d.set_entity(id, entity)
+            return
+        else
+            utils.to_tick(function(_text)
+                if uids[_text.entity] then
+                    module.apply({ entity = _text.entity, id = _text.id })
+                    return
+                end
+
+                return { _text }
+            end, { text }, tostring(text.id) .. "text3d")
+        end
+    end
+end
 
 function module.show(text)
     local id = gfx.text3d.show(
@@ -19,6 +46,9 @@ function module.show(text)
     end
     if text.rotation then
         gfx.text3d.set_rotation(id, text.rotation)
+    end
+    if text.entity then
+        apply_entity(text)
     end
 end
 
@@ -46,6 +76,9 @@ function module.apply(text)
     end
     if text.axisY then
         gfx.text3d.set_axis_y(id, text.axisY)
+    end
+    if text.entity then
+        apply_entity(text)
     end
 end
 

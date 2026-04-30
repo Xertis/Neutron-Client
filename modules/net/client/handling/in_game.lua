@@ -125,6 +125,29 @@ shared[protocol.ServerMsg.PlayerHandSlot] = function(server, packet)
     player.set_selected_slot(hud.get_player(), packet.slot)
 end
 
+shared[protocol.ServerMsg.OnlinePlayersList] = function(server, packet)
+    for _, _player in ipairs(packet.list) do
+        local name = _player[1]
+        local pid = _player[2]
+        if CLIENT_PLAYER.pid ~= pid then
+            PLAYER_LIST[pid] = { pid = pid, name = name }
+        end
+    end
+end
+
+shared[protocol.ServerMsg.OnlinePlayersListAdd] = function(server, packet)
+    local name = packet.data[1]
+    local pid = packet.data[2]
+
+    if CLIENT_PLAYER.pid ~= pid and not PLAYER_LIST[pid] then
+        PLAYER_LIST[pid] = { pid = pid, name = name }
+    end
+end
+
+shared[protocol.ServerMsg.OnlinePlayersListRemove] = function(server, packet)
+    PLAYER_LIST[packet.pid] = nil
+end
+
 shared[protocol.ServerMsg.PackEvent] = function(server, packet)
     api_events.__emit__(packet.pack, packet.event, packet.bytes)
 end
@@ -146,8 +169,12 @@ shared[protocol.ServerMsg.WeatherChanged] = function(server, packet)
     )
 end
 
+shared[protocol.ServerMsg.EntitySpawn] = function(server, packet)
+    api_entities.__spawn__(packet.uid, packet.def, packet.dirty, packet.args)
+end
+
 shared[protocol.ServerMsg.EntityUpdate] = function(server, packet)
-    api_entities.__emit__(packet.uid, packet.def, packet.dirty)
+    api_entities.__emit__(packet.uid, packet.dirty)
 end
 
 shared[protocol.ServerMsg.EntityDespawn] = function(server, packet)
@@ -163,7 +190,7 @@ shared[protocol.ServerMsg.ParticleStop] = function(server, packet)
 end
 
 shared[protocol.ServerMsg.ParticleOrigin] = function(server, packet)
-    api_particles.set_origin(packet.origin)
+    api_particles.set_origin(packet)
 end
 
 shared[protocol.ServerMsg.AudioEmit] = function(server, packet)
@@ -213,6 +240,14 @@ end
 
 shared[protocol.ServerMsg.Text3DState] = function(server, packet)
     api_text3d.apply(packet.state)
+end
+
+shared[protocol.ServerMsg.Text3DPos] = function(server, packet)
+    api_text3d.apply({ position = packet.pos, id = packet.id })
+end
+
+shared[protocol.ServerMsg.Text3DEntity] = function(server, packet)
+    api_text3d.apply(packet)
 end
 
 shared[protocol.ServerMsg.Text3DAxis] = function(server, packet)

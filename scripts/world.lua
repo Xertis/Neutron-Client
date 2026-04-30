@@ -70,9 +70,14 @@ function on_world_tick()
         player.set_pos(CLIENT_PLAYER.pid, x, math.clamp(y, 0, 255), z)
     end
 
-
-    if IS_REMOTE and external_app.get_setting("chunks.load-distance") > CHUNK_LOADING_DISTANCE then
+    local view_distance = external_app.get_setting("chunks.load-distance")
+    if IS_REMOTE and view_distance > CHUNK_LOADING_DISTANCE then
         external_app.set_setting("chunks.load-distance", CHUNK_LOADING_DISTANCE)
+    end
+
+    if SENDED_VIEW_DISTANCE ~= view_distance then
+        SENDED_VIEW_DISTANCE = view_distance
+        SERVER:push_packet(protocol.ClientMsg.ViewDistance, { view_distance })
     end
 end
 

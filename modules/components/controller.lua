@@ -1,80 +1,106 @@
 local protocol = import "net/protocol/protocol"
 
+
 local tsf = entity.transform
 local body = entity.rigidbody
+local rig = entity.skeleton
 
-function set_pos(target_pos)
-    local current_pos = tsf:get_pos()
-    local direction = vec3.sub(target_pos, current_pos)
-    local distance = vec3.length(direction)
+local target_pos = nil
+local SMOOTH = 12
 
-    if distance > 10 or distance < 0.1 then
-        tsf:set_pos(target_pos)
-        if body then
-            body:set_vel({ 0, 0, 0 })
-        end
-    elseif body then
-        local time_to_reach = 0.1
-        local velocity = vec3.mul(vec3.normalize(direction), distance / time_to_reach)
-        body:set_vel(velocity)
+local bone_transitions = {}
+local rot_transition = nil
+
+local function mat4_lerp(a, b, t)
+    local da = mat4.decompose(a)
+    local db = mat4.decompose(b)
+    if not da or not db then return b end
+    local pos   = vec3.lerp(da.translation, db.translation, t)
+    local scale = vec3.lerp(da.scale, db.scale, t)
+    local rot   = quat.slerp(da.quaternion, db.quaternion, t)
+    local m     = mat4.from_quat(rot)
+    m           = mat4.scale(m, scale)
+    m           = mat4.translate(m, pos)
+    return m
+end
+
+function set_pos(pos)
+    local current = tsf:get_pos()
+    local dist = vec3.length(vec3.sub(pos, current))
+    if dist > 10 or dist < 0.01 then
+        tsf:set_pos(pos)
+        if body then body:set_vel({ 0, 0, 0 }) end
+        target_pos = nil
+    else
+        target_pos = pos
     end
 end
 
 function set_rot(rot_mat)
-    tsf:set_rot(rot_mat)
+    local current = tsf:get_rot()
+    rot_transition = {
+        from  = current,
+        to    = rot_mat,
+        t     = 0,
+        speed = 8
+    }
+end
+
+function set_transform_matrix(key, val)
+    local current = rig:get_matrix(key) or val
+    bone_transitions[key] = {
+        from  = current,
+        to    = val,
+        t     = 0,
+        speed = 8
+    }
+end
+
+function on_render(delta)
+    if rot_transition then
+        local tr = rot_transition
+        tr.t = tr.t + delta * tr.speed
+        local t = math.min(tr.t, 1.0)
+        tsf:set_rot(mat4_lerp(tr.from, tr.to, t))
+        if t >= 1.0 then
+            rot_transition = nil
+        end
+    end
+
+    for key, tr in pairs(bone_transitions) do
+        tr.t = tr.t + delta * tr.speed
+        local t = math.min(tr.t, 1.0)
+        local m = mat4_lerp(tr.from, tr.to, t)
+        rig:set_matrix(key, m)
+        if t >= 1.0 then
+            bone_transitions[key] = nil
+        end
+    end
+
+    if target_pos and body then
+        local current = tsf:get_pos()
+        local diff    = vec3.sub(target_pos, current)
+        local dist    = vec3.length(diff)
+        if dist < 0.01 then
+            tsf:set_pos(target_pos)
+            body:set_vel({ 0, 0, 0 })
+            target_pos = nil
+        else
+            body:set_vel(vec3.mul(diff, SMOOTH))
+        end
+    end
 end
 
 function on_attacked(attackerid, playerid)
     if not playerid or playerid == -1 then return end
-
     SERVER:push_packet(protocol.ClientMsg.EntityInteract, {
-        uid = SERVER_UID,
-        action = 0
+        uid = SERVER_UID, action = 0
     })
 end
 
 function on_used(playerid)
     if not playerid or playerid == -1 then return end
-
     SERVER:push_packet(protocol.ClientMsg.EntityInteract, {
-        uid = SERVER_UID,
-        action = 1
+        uid = SERVER_UID, action = 1
     })
 end
-
-function on_custom_field_update(field, value)
-    local pid = entity:get_player()
-    if not pid then return end
-
-    if field == "name" then
-        player.set_name(pid, value)
-        local player_obj = PLAYER_LIST[pid]
-        player_obj.name = value
-    elseif field == "rot" then
-        player.set_rot(pid, value[1], value[2], value[3])
-    elseif field == "hand" then
-        local player_obj = PLAYER_LIST[pid]
-        player_obj:set_hand_item(value)
-    end
-end
-
--- on_render = function(delta)
---     if not is_rotating or not target_rotation then
---         return
---     end
-
---     rotation_timer = rotation_timer + delta
-
---     local t = rotation_timer / rotation_duration
-
---     if t >= 1 then
-
---         tsf:set_rot(mat4.from_quat(target_rotation))
---         is_rotating = false
---         return
---     end
-
---     local interpolated = quat.slerp(start_rotation, target_rotation, t)
-
---     tsf:set_rot(mat4.from_quat(interpolated))
--- end,

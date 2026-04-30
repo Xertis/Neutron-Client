@@ -77,7 +77,7 @@ function bit_buffer:new(bytes, order)
     obj.current_is_zero = true
     obj.external_buffer = false
     obj.recv_func = false
-    obj.order = order
+    obj.order = order or "BE"
 
     if type(bytes) ~= "cdata" then
         obj.bytes = Bytearray()
@@ -121,13 +121,13 @@ function bit_buffer:swap_bytes(bytes)
     if self.order == "LE" then
         return bytes
     else
-        local b = bytes.bytes
-        local len = bytes.size
-        for i = 0, math.floor((len - 1) / 2) do
-            local j = len - 1 - i
-            b[i], b[j] = b[j], b[i]
+        local res = Bytearray(#bytes)
+
+        for i = 1, #bytes do
+            res[#bytes - (i - 1)] = bytes[i]
         end
-        return bytes
+
+        return res
     end
 end
 

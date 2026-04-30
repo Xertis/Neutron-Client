@@ -7,3 +7,4 @@ CLIENT = nil
 CLIENT_PID = nil
 SERVER = nil
 IS_REMOTE = true
+SENDED_VIEW_DISTANCE = nil

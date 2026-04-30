@@ -786,6 +786,64 @@ function vec3.checksum(x, y, z)
     return (sum + sign_bit * 65531) % 65535
 end
 
+-- MAT4
+local function mat4_skew(sh)
+    return {
+        1, 0, 0, 0,
+        sh[1] or 0, 1, 0, 0,
+        sh[2] or 0, sh[3] or 0, 1, 0,
+        0, 0, 0, 1
+    }
+end
+
+local function mat4_perspective_raw(p)
+    return {
+        1, 0, 0, p[1] or 0,
+        0, 1, 0, p[2] or 0,
+        0, 0, 1, p[3] or 0,
+        0, 0, 0, p[4] or 1
+    }
+end
+
+function mat4.compose(d, dst)
+    if not d then
+        return nil
+    end
+
+    local m = mat4.idt()
+
+    if d.perspective then
+        m = mat4.mul(mat4_perspective_raw(d.perspective), m)
+    end
+
+    if d.translation then
+        m = mat4.translate(m, d.translation)
+    end
+
+    if d.quaternion then
+        m = mat4.mul(m, mat4.from_quat(d.quaternion))
+    elseif d.rotation then
+        m = mat4.mul(m, d.rotation)
+    end
+
+    if d.skew then
+        m = mat4.mul(m, mat4_skew(d.skew))
+    end
+
+    if d.scale then
+        m = mat4.scale(m, d.scale)
+    end
+
+    if dst then
+        for i = 1, 16 do
+            dst[i] = m[i]
+        end
+        return dst
+    end
+
+    return m
+end
+
 -- OTHER
 
 function tohex(num)

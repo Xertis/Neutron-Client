@@ -13,7 +13,7 @@ COLORS = {
     gray = "[#4d4d4d]"
 }
 
-PROTOCOL_VERSION = "3.4"
+PROTOCOL_VERSION = "3.5"
 API_VERSION = "2"
 PROTOCOL_STATES = {
     Status = 0,
