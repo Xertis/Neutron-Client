@@ -13,6 +13,11 @@ local client_api = {
     env = env,
     entities = entities,
     inventory_data = inv_dat,
+    utils = {
+        classes = {
+            module = Module
+        }
+    }
 }
 
 

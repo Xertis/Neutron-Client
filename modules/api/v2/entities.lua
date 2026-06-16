@@ -10,10 +10,7 @@ local desynced_entities = {}
 
 local despawned = {}
 
-local self = Module()
-local shared = self.shared
-local single = self.single
-local remote = self.remote
+local module = {}
 
 local PLAYER_ENTITY_ID = nil
 
@@ -46,14 +43,14 @@ local function __despawn(cuid)
     end
 end
 
-function shared.__world_spawn(cuid)
+function module.__world_spawn(cuid)
     if despawned[cuid] then
         __despawn(cuid)
         despawned[cuid] = nil
     end
 end
 
-function shared.__world_despawn(cuid)
+function module.__world_despawn(cuid)
     local uid = entities_cuids[cuid]
     if not uid then return end
 
@@ -66,21 +63,21 @@ function shared.__world_despawn(cuid)
     components_manager.clean_component(cuid)
 end
 
-function shared.desync(name)
+function module.desync(name)
     desynced_entities[name] = true
 end
 
-function shared.sync(name)
+function module.sync(name)
     desynced_entities[name] = nil
 end
 
-function shared.set_handler(triggers, handler)
+function module.set_handler(triggers, handler)
     for _, trigger in ipairs(triggers) do
         handlers[trigger] = handler
     end
 end
 
-function shared.__despawn__(uid)
+function module.__despawn__(uid)
     local cuid = entities_uids[uid]
     if not cuid then return end
 
@@ -102,7 +99,7 @@ local function call_component(entity, fields)
     end
 end
 
-function remote.__update(cuid, def, dirty)
+function module.__update(cuid, def, dirty)
     local std_fields = dirty.standard_fields or {}
     local entity = entities.get(cuid)
     if not entity then return end
@@ -154,22 +151,11 @@ function remote.__update(cuid, def, dirty)
     if std_fields.body_elastic then rigidbody:set_elasticity(std_fields.body_elastic) end
 end
 
-function single.__update(cuid, def, dirty)
-    local entity = entities.get(cuid)
-    if not entity then return end
-
-    call_component(entity, dirty.custom_fields or {})
-
-    if handlers[def] then
-        handlers[def](cuid, def, dirty.custom_fields or {})
-    end
-end
-
-function shared.__get_uids__()
+function module.__get_uids__()
     return entities_uids
 end
 
-function shared.__spawn__(uid, def, dirty, args)
+function module.__spawn__(uid, def, dirty, args)
     local std_fields = dirty.standard_fields or {}
 
     if not entities_uids[uid] then
@@ -187,10 +173,10 @@ function shared.__spawn__(uid, def, dirty, args)
     local cuid = entities_uids[uid]
     entities_cuids[cuid] = uid
 
-    self.__emit__(uid, dirty)
+    module.__emit__(uid, dirty)
 end
 
-function shared.__emit__(uid, dirty)
+function module.__emit__(uid, dirty)
     if not PLAYER_ENTITY_ID then
         local player_entity = entities.get(player.get_entity(hud.get_player()))
         PLAYER_ENTITY_ID = player_entity:def_index()
@@ -199,7 +185,7 @@ function shared.__emit__(uid, dirty)
     local cuid = entities_uids[uid]
     if not cuid then return end
 
-    self.__update(cuid, entities.get(cuid):def_index(), dirty)
+    module.__update(cuid, entities.get(cuid):def_index(), dirty)
 end
 
-return self:build()
+return module
