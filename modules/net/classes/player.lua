@@ -18,7 +18,7 @@ function Player.new(pid, name, pos, rot, cheats)
     self.invid = player.get_inventory(pid)
     self.inv = {}
     self.slot = 0
-    self.region = { x = 0, z = 0 }
+    self.region = { x = 0, y = 0, z = 0 }
     self.pos = pos or { x = 0, y = -10, z = 0 }
     self.rot = rot or { x = 0, y = 0, z = 0 }
     self.cheats = cheats or { noclip = false, flight = false }
@@ -159,8 +159,9 @@ function Player:set_pos(pos, set_flag)
     self.pos = { x = pos.x, y = pos.y, z = pos.z }
 
     self.region = {
-        x = math.floor(pos.x / 32),
-        z = math.floor(pos.z / 32)
+        x = math.floor(pos.x / 64),
+        y = math.floor(pos.y / 64),
+        z = math.floor(pos.z / 64)
     }
 
     if set_flag then
@@ -299,11 +300,12 @@ function Player:__check_pos()
         self.changed_flags.pos = true
     end
 
-    local cur_region_x = math.floor(x / 32)
-    local cur_region_z = math.floor(z / 32)
+    local cur_region_x = math.floor(x / 64)
+    local cur_region_y = math.floor(y / 64)
+    local cur_region_z = math.floor(z / 64)
 
-    if self.region.x ~= cur_region_x or self.region.z ~= cur_region_z then
-        self.region = { x = cur_region_x, z = cur_region_z }
+    if self.region.x ~= cur_region_x or self.region.y ~= cur_region_y or self.region.z ~= cur_region_z then
+        self.region = { x = cur_region_x, y = cur_region_y, z = cur_region_z }
         self.changed_flags.region = true
     end
 end

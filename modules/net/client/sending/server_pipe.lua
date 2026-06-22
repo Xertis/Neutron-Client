@@ -14,6 +14,7 @@ ServerPipe:add_middleware(function(server)
     if CLIENT_PLAYER.changed_flags.region then
         server:push_packet(protocol.ClientMsg.PlayerRegion, {
             x = CLIENT_PLAYER.region.x,
+            y = CLIENT_PLAYER.region.y,
             z = CLIENT_PLAYER.region.z
         })
         CLIENT_PLAYER.changed_flags.region = false

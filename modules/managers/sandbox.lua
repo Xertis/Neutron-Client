@@ -8,8 +8,9 @@ local function block_in_region(x, y, z)
         return false
     end
 
-    local abs_x = x - CLIENT_PLAYER.region.x * 32
-    local abs_z = z - CLIENT_PLAYER.region.z * 32
+    local abs_x = x - CLIENT_PLAYER.region.x * 64
+    local abs_y = y - CLIENT_PLAYER.region.y * 64
+    local abs_z = z - CLIENT_PLAYER.region.z * 64
 
     if abs_x < -127 or abs_x > 127 or abs_z < -127 or abs_z > 127 then
         return false
@@ -36,8 +37,8 @@ function module.on_placed(blockid, x, y, z, states)
             }
         }))
     else
-        local abs_x = x - CLIENT_PLAYER.region.x * 32
-        local abs_z = z - CLIENT_PLAYER.region.z * 32
+        local abs_x = x - CLIENT_PLAYER.region.x * 64
+        local abs_z = z - CLIENT_PLAYER.region.z * 64
         buffer:put_bytes(protocol.build_packet("client", protocol.ClientMsg.BlockRegionUpdate, {
             block = {
                 pos = { x = abs_x, y = y, z = abs_z },
@@ -58,8 +59,8 @@ function module.on_broken(blockid, x, y, z)
             }
         ))
     else
-        local abs_x = x - CLIENT_PLAYER.region.x * 32
-        local abs_z = z - CLIENT_PLAYER.region.z * 32
+        local abs_x = x - CLIENT_PLAYER.region.x * 64
+        local abs_z = z - CLIENT_PLAYER.region.z * 64
         buffer:put_bytes(protocol.build_packet(
             "client",
             protocol.ClientMsg.BlockRegionDestroy,
@@ -80,8 +81,8 @@ function module.on_interact(blockid, x, y, z)
             }
         ))
     else
-        local abs_x = x - CLIENT_PLAYER.region.x * 32
-        local abs_z = z - CLIENT_PLAYER.region.z * 32
+        local abs_x = x - CLIENT_PLAYER.region.x * 64
+        local abs_z = z - CLIENT_PLAYER.region.z * 64
         buffer:put_bytes(protocol.build_packet(
             "client",
             protocol.ClientMsg.BlockRegionInteract,
