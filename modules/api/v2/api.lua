@@ -6,7 +6,7 @@ local rpc = import "api/v2/rpc"
 local bson = import "lib/data/bson"
 local inv_dat = import "api/v2/inv_dat"
 local messages = import "api/v2/messages"
-local replication = import "api/v2/replication"
+local replications = import "api/v2/replications"
 
 local client_api = {
     events = events,
@@ -16,7 +16,7 @@ local client_api = {
     entities = entities,
     inventory_data = inv_dat,
     messages = messages,
-    replication = replication,
+    replications = replications,
     utils = {
         classes = {
             module = Module
