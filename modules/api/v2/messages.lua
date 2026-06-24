@@ -105,10 +105,10 @@ function Message:send(data)
 end
 
 function Message:on(handler)
-    events.on(self.pack, self.event, function(client, bytes)
+    events.on(self.pack, self.event, function(bytes)
         local buf = protocol.create_databuffer(bytes)
         local data = self:decode(buf)
-        handler(client, data)
+        handler(data)
     end)
 end
 
