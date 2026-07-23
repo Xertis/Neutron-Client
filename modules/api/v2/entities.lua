@@ -1,6 +1,6 @@
 local protocol = import "net/protocol/protocol"
-local components_manager = import "managers/components"
-local Player = import "net/classes/player"
+local components_manager = import "core/components"
+local Player = import "core/classes/player"
 
 local entities_uids = {}
 local entities_cuids = {}

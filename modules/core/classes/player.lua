@@ -26,6 +26,7 @@ function Player.new(pid, name, pos, rot, cheats)
     self.hand_item = 0
     self.infinite_items = player.is_infinite_items(pid)
     self.instant_destruction = player.is_instant_destruction(pid)
+    self.is_crouching = false
     self.interaction_distance = player.get_interaction_distance(pid)
 
     self.ping = {
@@ -46,7 +47,8 @@ function Player.new(pid, name, pos, rot, cheats)
         region = false,
         infinite_items = false,
         instant_destruction = false,
-        interaction_distance = false
+        interaction_distance = false,
+        is_crouching = false,
     }
 
     max_id = max_id + 1
@@ -256,6 +258,7 @@ function Player:tick()
         self:__check_infinite_items()
         self:__check_instant_destruction()
         self:__check_interaction_distance()
+        self:__check_crouching()
     end
 
     self:__check_inv()
@@ -341,6 +344,16 @@ function Player:__check_slot()
     if self.slot ~= cur_slot then
         self.slot = cur_slot
         self.changed_flags.slot = true
+    end
+end
+
+function Player:__check_crouching()
+    local uid = player.get_entity(self.pid)
+    local entity = entities.get(uid)
+    local is_crouching = entity.rigidbody:is_crouching()
+    if self.is_crouching ~= is_crouching then
+        self.is_crouching = is_crouching
+        self.changed_flags.is_crouching = true
     end
 end
 

@@ -1,6 +1,6 @@
 local Pipeline = import "lib/flow/pipeline"
 local protocol = import "net/protocol/protocol"
-local sandbox = import "managers/sandbox"
+local sandbox = import "core/sandbox"
 
 local ServerPipe = Pipeline.new()
 
@@ -33,6 +33,17 @@ ServerPipe:add_middleware(function(server)
             }
         })
         CLIENT_PLAYER.changed_flags.pos = false
+    end
+    return server
+end)
+
+--Отправляем присед игрока
+ServerPipe:add_middleware(function(server)
+    if CLIENT_PLAYER.changed_flags.is_crouching then
+        server:push_packet(protocol.ClientMsg.PlayerCrouching, {
+            is_crouching = CLIENT_PLAYER.is_crouching
+        })
+        CLIENT_PLAYER.changed_flags.is_crouching = false
     end
     return server
 end)

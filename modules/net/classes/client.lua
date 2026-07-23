@@ -1,6 +1,6 @@
 local Server = import "net/classes/server"
 local protocol = import "net/protocol/protocol"
-local Client_pipe = import "net/client/client_pipe"
+local Client_pipe = import "net/pipelines/main"
 local Network = import "net/classes/network"
 
 local Client = {}

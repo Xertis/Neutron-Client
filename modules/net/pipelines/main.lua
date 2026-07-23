@@ -1,9 +1,9 @@
 local protocol = import "net/protocol/protocol"
 
-local in_menu_handlers = import "net/client/handling/in_menu"
-local in_game_handlers = import "net/client/handling/in_game"
+local in_menu_handlers = import "net/handlers/in_menu"
+local in_game_handlers = import "net/handlers/in_game"
 
-local server_pipe = import "net/client/sending/server_pipe"
+local server_pipe = import "net/pipelines/server"
 
 local Pipeline = import "lib/flow/pipeline"
 local List = import "lib/utils/list"

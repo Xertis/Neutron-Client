@@ -25,7 +25,7 @@ end
 
 return function()
     IS_REMOTE = false
-    local Client = import "net/client/client"
+    local Client = import "net/classes/client"
 
     local client = Client.new()
 

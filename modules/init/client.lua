@@ -39,7 +39,7 @@ return function(app)
 
     table.insert_unique(CONTENT_PACKS, SHELL.prefix)
 
-    local Client = import "client:net/client/client"
+    local Client = import "client:net/classes/client"
 
     local client = Client.new()
 

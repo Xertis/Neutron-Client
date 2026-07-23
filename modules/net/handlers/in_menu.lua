@@ -1,6 +1,6 @@
 local protocol = import "net/protocol/protocol"
 local hash = import "lib/crypto/hash"
-local Player = require "net/classes/player"
+local Player = require "core/classes/player"
 
 local module = {}
 
@@ -51,11 +51,6 @@ module[protocol.ServerMsg.PacksList] = function(server, packet)
     end
 
     local events_handlers = table.copy(events.handlers)
-
-    external_app.reset_content()
-    external_app.config_packs(CONTENT_PACKS)
-
-    external_app.load_content()
 
     events.handlers = table.merge(events_handlers, events.handlers)
 

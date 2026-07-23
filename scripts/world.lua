@@ -13,8 +13,8 @@ local CHUNK_LOADING_DISTANCE = nil
 
 function on_world_open()
     protocol = import "net/protocol/protocol"
-    sandbox = import "managers/sandbox"
-    inventory_manager = import "managers/inventory"
+    sandbox = import "core/sandbox"
+    inventory_manager = import "core/inventory"
     entities_manager = import "api/v2/entities"
     utils = import "lib/utils/utils"
 
@@ -25,7 +25,7 @@ function on_world_open()
     CHUNK_LOADING_DISTANCE = env.CHUNK_LOADING_DISTANCE
 
     if IS_REMOTE then
-        local Player = import "net/classes/player"
+        local Player = import "core/classes/player"
         CLIENT_PLAYER = Player.new(CLIENT_PID, SHELL.module.states.get_username())
         env.CLIENT_PLAYER = CLIENT_PLAYER
     end

@@ -5,7 +5,7 @@ function on_hud_open()
     _G["hud"].open = function() end
     _G["hud"].open_block = function() end
     hud.set_allow_pause(false)
-    inventory_manager = import "managers/inventory"
+    inventory_manager = import "core/inventory"
 end
 
 function on_hud_render()

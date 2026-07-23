@@ -3,12 +3,12 @@ local protocol = import "net/protocol/protocol"
 local api_events = import "api/v2/events"
 local api_entities = import "api/v2/entities"
 local api_env = import "api/v2/env"
-local api_particles = import "managers/particles"
-local api_audio = import "managers/audio"
-local api_text3d = import "managers/text3d"
-local api_wraps = import "managers/wraps"
+local api_particles = import "core/particles"
+local api_audio = import "core/audio"
+local api_text3d = import "core/text3d"
+local api_wraps = import "core/wraps"
 
-local inventory_manager = import "managers/inventory"
+local inventory_manager = import "core/inventory"
 
 local module = {
     [protocol.ServerMsg.SynchronizePlayer] = function() end,
