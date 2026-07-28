@@ -122,6 +122,10 @@ module[protocol.ServerMsg.PlayerHandSlot] = function(server, packet)
     player.set_selected_slot(hud.get_player(), packet.slot)
 end
 
+module[protocol.ServerMsg.PlayerRule] = function(server, packet)
+    rules.set(packet.rule.name, packet.rule.value)
+end
+
 module[protocol.ServerMsg.OnlinePlayersList] = function(server, packet)
     for _, _player in ipairs(packet.list) do
         local name = _player[1]
