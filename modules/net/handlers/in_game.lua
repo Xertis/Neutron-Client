@@ -122,8 +122,8 @@ module[protocol.ServerMsg.PlayerHandSlot] = function(server, packet)
     player.set_selected_slot(hud.get_player(), packet.slot)
 end
 
-module[protocol.ServerMsg.PlayerRule] = function(server, packet)
-    rules.set(packet.rule.name, packet.rule.value)
+module[protocol.ServerMsg.RuleUpdate] = function(server, packet)
+    rules.set(packet.name, packet.value)
 end
 
 module[protocol.ServerMsg.OnlinePlayersList] = function(server, packet)
