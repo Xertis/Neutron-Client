@@ -183,14 +183,14 @@ end
 
 function module.write(buf, side, letter, data)
     if not compiled[side][letter] then
-        error("Unknown packet letter: " .. tostring(letter))
+        error("Unknown packet letter while writing: " .. tostring(letter))
     end
     compiled[side][letter].encode(buf, data or {})
 end
 
 function module.read(buf, side, letter)
     if not compiled[side][letter] then
-        error("Unknown packet letter: " .. tostring(letter))
+        error("Unknown packet letter while reading: " .. tostring(letter))
     end
     return compiled[side][letter].decode(buf)
 end

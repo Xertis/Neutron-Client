@@ -62,9 +62,7 @@ function protocol.parse_packet(client_or_server, external_buffer)
 
         logger.log("Packet:", 'E', true)
         logger.log(table.tostring({ client_or_server, packet_type }), 'E', true)
-
-        logger.log("Data:", 'E', true)
-        logger.log(table.tostring(data), 'E', true)
+        error()
         return {}
     end
 
