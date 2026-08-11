@@ -105,4 +105,38 @@ function module.interact(invid, slot, action, mode)
     })
 end
 
+function module.pick()
+    local x, y, z = player.get_selected_block(CLIENT_PLAYER.pid)
+    local picking_id = block.get_picking_item(block.get(x, y, z))
+
+    if not picking_id then
+        return
+    end
+
+    if inventory.find_by_item(id2Invid[1], picking_id, 0, 9) ~= nil then
+        return
+    end
+
+    local _, slot = player.get_inventory(CLIENT_PLAYER.pid)
+    slot = inventory.find_by_item(id2Invid[1], 0, 0, 9, 0) or slot
+
+    SERVER:push_packet(protocol.ClientMsg.InventoryInteract, {
+        inventory_id = invid2Id[0],
+        slot = picking_id - 1,
+        action = 1,
+        mode = 0,
+        item_id = picking_id,
+        checksum = checksum(0)
+    })
+
+    SERVER:push_packet(protocol.ClientMsg.InventoryInteract, {
+        inventory_id = invid2Id[1],
+        slot = slot,
+        action = 0,
+        mode = 0,
+        item_id = picking_id,
+        checksum = checksum(id2Invid[1])
+    })
+end
+
 return module

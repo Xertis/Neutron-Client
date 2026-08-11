@@ -1,6 +1,5 @@
 local protocol = import "net/protocol/protocol"
 local hash = import "lib/crypto/hash"
-local Player = require "core/classes/player"
 
 local module = {}
 

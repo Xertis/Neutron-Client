@@ -6,6 +6,8 @@ function on_hud_open()
     _G["hud"].open_block = function() end
     hud.set_allow_pause(false)
     inventory_manager = import "core/inventory"
+
+    require "init/inputs"
 end
 
 function on_hud_render()
