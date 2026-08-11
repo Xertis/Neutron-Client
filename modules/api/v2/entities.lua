@@ -104,10 +104,13 @@ function module.__update(cuid, def, dirty)
     local entity = entities.get(cuid)
     if not entity then return end
 
-    call_component(entity, dirty.custom_fields or {})
+    if dirty.custom_fields then
+        call_component(entity, dirty.custom_fields)
+        local def_name = entities.def_name(def)
 
-    if handlers[def] then
-        handlers[def](cuid, def, dirty.custom_fields or {})
+        if handlers[def_name] then
+            handlers[def_name](cuid, def, dirty.custom_fields)
+        end
     end
 
     if dirty.components then
