@@ -8,6 +8,7 @@ local inv_dat = import "api/v2/inv_dat"
 local messages = import "api/v2/messages"
 local replications = import "api/v2/replications"
 local rules = import "api/v2/rules"
+local predicted_events = import "api/v2/predicted_events"
 
 local client_api = {
     events = events,
@@ -19,6 +20,7 @@ local client_api = {
     messages = messages,
     replications = replications,
     rules = rules,
+    predicted_events = predicted_events,
     utils = {
         classes = {
             module = Module
