@@ -119,6 +119,7 @@ function Instant.new(predicted, event_id, request_id, data, progress)
         event_id = event_id,
         request_id = request_id,
         data = data,
+        start_time = time.uptime(),
         progress = progress,
         predicted = predicted,
         active = false
@@ -126,7 +127,12 @@ function Instant.new(predicted, event_id, request_id, data, progress)
 end
 
 function Instant:get_progress()
-	return self.progress
+    return self.progress
+end
+
+function Instant:get_elapsed()
+    local now = time.uptime()
+    return now - self.start_time
 end
 
 function Instant:interrupt()
