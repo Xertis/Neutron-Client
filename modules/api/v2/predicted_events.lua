@@ -1,13 +1,13 @@
 local Messages = import "api/v2/messages"
 
 local next_request_id = 0
-local next_instant_id = 0
+local next_instance_id = 0
 
 local PredictedEvent = {}
 PredictedEvent.__index = PredictedEvent
 
-local Instant = {}
-Instant.__index = Instant
+local Instance = {}
+Instance.__index = Instance
 
 
 function PredictedEvent.new(pack, event, schema, config)
@@ -56,49 +56,49 @@ function PredictedEvent.new(pack, event, schema, config)
     }
 
     self.messages.s_ack:on(function (data)
-        local requested_instant = self.requested_instances[data.request_id]
+        local requested_instance = self.requested_instances[data.request_id]
         self.requested_instances[data.request_id] = nil
 
         if data.accepted then
-            self.instances[data.event_id] = requested_instant
-            requested_instant.event_id = data.event_id
-            requested_instant.active = true
-            self.config.on_ack_start(requested_instant)
+            self.instances[data.event_id] = requested_instance
+            requested_instance.event_id = data.event_id
+            requested_instance.active = true
+            self.config.on_ack_start(requested_instance)
         else
-            self.config.on_reject(requested_instant)
+            self.config.on_reject(requested_instance)
         end
     end)
 
     self.messages.s_progress:on(function (data)
-        local instant = self.instances[data.event_id]
-        if not instant then return end
+        local instance = self.instances[data.event_id]
+        if not instance then return end
 
-        instant.progress = data.progress
+        instance.progress = data.progress
 
-        self.config.on_progress(instant)
+        self.config.on_progress(instance)
     end)
 
     self.messages.s_finish:on(function (data)
-        local instant = self.instances[data.event_id]
-        if not instant then return end
-        instant.progress = 1
-        instant.active = false
+        local instance = self.instances[data.event_id]
+        if not instance then return end
+        instance.progress = 1
+        instance.active = false
         self.instances[data.event_id] = nil
-        self.config.on_finish(instant)
+        self.config.on_finish(instance)
     end)
 
     self.messages.s_interrupt:on(function (data)
-        local instant = self.instances[data.event_id]
-        if not instant then return end
-        instant.active = false
+        local instance = self.instances[data.event_id]
+        if not instance then return end
+        instance.active = false
         self.instances[data.event_id] = nil
-        self.config.on_interrupt(instant)
+        self.config.on_interrupt(instance)
     end)
 
     self.messages.s_observe_start:on(function (packet)
-        local instant = Instant.new(self, packet.event_id, nil, packet.data, packet.progress)
-        self.instances[packet.event_id] = instant
-        self.config.on_ack_start(instant)
+        local instance = Instance.new(self, packet.event_id, nil, packet.data, packet.progress)
+        self.instances[packet.event_id] = instance
+        self.config.on_ack_start(instance)
     end)
 
     self.requested_instances = {}
@@ -115,17 +115,17 @@ function PredictedEvent:start(data)
         data = data
     })
 
-    local instant = Instant.new(self, nil, next_request_id, data, 0)
-    self.requested_instances[next_request_id] = instant
+    local instance = Instance.new(self, nil, next_request_id, data, 0)
+    self.requested_instances[next_request_id] = instance
 
     next_request_id = next_request_id + 1
 
-    return instant
+    return instance
 end
 
-function Instant.new(predicted, event_id, request_id, data, progress)
-    local instant = setmetatable({
-        instant_id = next_instant_id,
+function Instance.new(predicted, event_id, request_id, data, progress)
+    local instance = setmetatable({
+        instance_id = next_instance_id,
         event_id = event_id,
         request_id = request_id,
         data = data,
@@ -133,23 +133,23 @@ function Instant.new(predicted, event_id, request_id, data, progress)
         progress = progress,
         predicted = predicted,
         active = false
-    }, Instant)
+    }, Instance)
 
-    next_instant_id = next_instant_id + 1
+    next_instance_id = next_instance_id + 1
 
-    return instant
+    return instance
 end
 
-function Instant:get_progress()
+function Instance:get_progress()
     return self.progress
 end
 
-function Instant:get_elapsed()
+function Instance:get_elapsed()
     local now = time.uptime()
     return now - self.start_time
 end
 
-function Instant:interrupt()
+function Instance:interrupt()
     if not self.active then return end
 
     self.active = false

@@ -10,7 +10,7 @@ console.add_command(
         end
 
         if SERVER then
-            SERVER:push_packet(protocol.ClientMsg.ChatMessage, { message })
+            SERVER:push_packet(protocol.ClientMsg.ChatMessage, { message = message })
         else
             console.log('Невозможно отправить сообщение')
         end
