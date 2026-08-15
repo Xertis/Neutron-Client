@@ -45,7 +45,7 @@ function on_chunk_present(x, z)
         return
     end
 
-    SERVER:push_packet(protocol.ClientMsg.RequestChunks, { buffer })
+    SERVER:push_packet(protocol.ClientMsg.RequestChunks, { chunks = buffer })
     buffer = { x, z }
 end
 
@@ -71,7 +71,7 @@ function on_world_tick()
 
     if SENDED_VIEW_DISTANCE ~= view_distance then
         SENDED_VIEW_DISTANCE = view_distance
-        SERVER:push_packet(protocol.ClientMsg.ViewDistance, { view_distance })
+        SERVER:push_packet(protocol.ClientMsg.ViewDistance, { distance = view_distance })
     end
 end
 

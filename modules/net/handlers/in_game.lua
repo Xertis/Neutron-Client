@@ -99,7 +99,7 @@ end
 module[protocol.ServerMsg.KeepAlive] = function(server, packet)
     CLIENT_PLAYER.ping.last_upd = time.uptime()
 
-    server:push_packet(protocol.ClientMsg.KeepAlive, { packet.challenge })
+    server:push_packet(protocol.ClientMsg.KeepAlive, { challenge = packet.challenge })
 end
 
 module[protocol.ServerMsg.InventorySync] = function(server, packet)

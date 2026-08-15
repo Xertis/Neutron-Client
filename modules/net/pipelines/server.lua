@@ -93,7 +93,7 @@ end)
 --Отправляем выбранный слот
 ServerPipe:add_middleware(function(server)
     if CLIENT_PLAYER.changed_flags.slot then
-        server:push_packet(protocol.ClientMsg.PlayerHandSlot, { CLIENT_PLAYER.slot })
+        server:push_packet(protocol.ClientMsg.PlayerHandSlot, { slot = CLIENT_PLAYER.slot })
         CLIENT_PLAYER.changed_flags.slot = false
     end
     return server
