@@ -1,6 +1,7 @@
 local Messages = import "api/v2/messages"
 
 local next_request_id = 0
+local next_instant_id = 0
 
 local PredictedEvent = {}
 PredictedEvent.__index = PredictedEvent
@@ -115,7 +116,8 @@ function PredictedEvent:start(data)
 end
 
 function Instant.new(predicted, event_id, request_id, data, progress)
-    return setmetatable({
+    local instant = setmetatable({
+        instant_id = next_instant_id,
         event_id = event_id,
         request_id = request_id,
         data = data,
@@ -124,6 +126,10 @@ function Instant.new(predicted, event_id, request_id, data, progress)
         predicted = predicted,
         active = false
     }, Instant)
+
+    next_instant_id = next_instant_id + 1
+
+    return instant
 end
 
 function Instant:get_progress()
