@@ -47,6 +47,14 @@ function PredictedEvent.new(pack, event, schema, config)
         })
     }
 
+    config = {
+        on_ack_start = config.on_ack_start or function(_) end,
+        on_reject = config.on_reject or function(_) end,
+        on_progress = config.on_progress or function(_) end,
+        on_finish = config.on_finish or function(_) end,
+        on_interrupt = config.on_interrupt or function(_) end,
+    }
+
     self.messages.s_ack:on(function (data)
         local requested_instant = self.requested_instances[data.request_id]
         self.requested_instances[data.request_id] = nil
