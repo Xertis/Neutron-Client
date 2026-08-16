@@ -171,7 +171,7 @@ module[protocol.ServerMsg.WeatherChanged] = function(server, packet)
 end
 
 module[protocol.ServerMsg.EntitySpawn] = function(server, packet)
-    api_entities.__spawn__(packet.uid, packet.def, packet.dirty, packet.args)
+    api_entities.__spawn__(packet.uid, packet.def, packet.is_own, packet.dirty, packet.args)
 end
 
 module[protocol.ServerMsg.EntityUpdate] = function(server, packet)

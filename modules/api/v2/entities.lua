@@ -36,6 +36,15 @@ entities.spawn = function(name, ...)
     return entity
 end
 
+local OWN_ENTITY_CUID = nil
+
+local function get_own_entity_cuid()
+    if not OWN_ENTITY_CUID then
+        OWN_ENTITY_CUID = player.get_entity(hud.get_player())
+    end
+    return OWN_ENTITY_CUID
+end
+
 local function __despawn(cuid)
     local entity = entities.get(cuid)
     if entity then
@@ -158,8 +167,16 @@ function module.__get_uids__()
     return entities_uids
 end
 
-function module.__spawn__(uid, def, dirty, args)
+function module.__spawn__(uid, def, is_own, dirty, args)
     local std_fields = dirty.standard_fields or {}
+
+    if is_own then
+        local cuid = get_own_entity_cuid()
+        entities_uids[uid] = cuid
+        entities_cuids[cuid] = uid
+        module.__emit__(uid, dirty)
+        return
+    end
 
     if not entities_uids[uid] then
         local entity_name = entities.def_name(def)
