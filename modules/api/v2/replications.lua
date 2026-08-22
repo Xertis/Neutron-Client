@@ -124,9 +124,7 @@ function Replication.new(pack, event, schema)
         end
 
         if listener._on_recv then
-            if not listener._on_recv(dirty) then
-                return
-            end
+            listener._on_recv(dirty)
         end
 
         apply_diff(compiled_schema, listener, dirty)

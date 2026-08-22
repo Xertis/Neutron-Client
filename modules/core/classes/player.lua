@@ -350,7 +350,11 @@ end
 function Player:__check_crouching()
     local uid = player.get_entity(self.pid)
     local entity = entities.get(uid)
-    local is_crouching = entity.rigidbody:is_crouching()
+    local is_crouching = self.is_crouching
+
+    if entity then
+        is_crouching = entity.rigidbody:is_crouching()
+    end
     if self.is_crouching ~= is_crouching then
         self.is_crouching = is_crouching
         self.changed_flags.is_crouching = true

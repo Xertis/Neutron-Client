@@ -36,13 +36,8 @@ entities.spawn = function(name, ...)
     return entity
 end
 
-local OWN_ENTITY_CUID = nil
-
 local function get_own_entity_cuid()
-    if not OWN_ENTITY_CUID then
-        OWN_ENTITY_CUID = player.get_entity(hud.get_player())
-    end
-    return OWN_ENTITY_CUID
+    return player.get_entity(hud.get_player())
 end
 
 local function __despawn(cuid)
