@@ -50,24 +50,34 @@ ClientPipe:add_middleware(function(server)
         in_menu_handlers["handshake"](server)
     end
 
-    while not List.is_empty(server.received_packets) do
-        local packet = List.popleft(server.received_packets)
-
-        local success, err = pcall(function()
-            if server.state ~= protocol.States.Active then
-                --debug.print(packet)
-                in_menu_handlers[packet.packet_type](server, packet)
-            elseif server.state == protocol.States.Active and hud then
-                in_game_handlers[packet.packet_type](server, packet)
+    local meta = server.meta
+    local co = meta.process_co
+    if not co then
+        co = coroutine.create(function()
+            while true do
+                if List.is_empty(server.received_packets) then
+                    coroutine.yield()
+                else
+                    local packet = List.popleft(server.received_packets)
+                    local success, err = pcall(function()
+                        if server.state ~= protocol.States.Active then
+                            --debug.print(packet)
+                            in_menu_handlers[packet.packet_type](server, packet)
+                        elseif server.state == protocol.States.Active and hud then
+                            in_game_handlers[packet.packet_type](server, packet)
+                        end
+                    end)
+                    if not success then
+                        logger.log("Error while reading packet: " .. err, 'E')
+                        logger.log("Packet type: " .. packet.packet_type, 'E')
+                        print(debug.traceback())
+                    end
+                end
             end
         end)
-
-        if not success then
-            logger.log("Error while reading packet: " .. err, 'E')
-            logger.log("Packet type: " .. packet.packet_type, 'E')
-            print(debug.traceback())
-        end
+        meta.process_co = co
     end
+    coroutine.resume(co)
 
     return server
 end)
