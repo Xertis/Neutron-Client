@@ -76,8 +76,9 @@ function module.sync(name)
 end
 
 function module.set_handler(triggers, handler)
-    for _, trigger in ipairs(triggers) do
-        handlers[trigger] = handler
+    for _, entity in ipairs(triggers) do
+        local entity_handlers = table.set_default(handlers, entity, {})
+        entity_handlers[#entity_handlers+1] = handler
     end
 end
 
@@ -113,7 +114,9 @@ function module.__update(cuid, def, dirty)
         local def_name = entities.def_name(def)
 
         if handlers[def_name] then
-            handlers[def_name](cuid, def, dirty.custom_fields)
+            for _, handler in ipairs(handlers[def_name]) do
+                handler(cuid, def, dirty.custom_fields)
+            end
         end
     end
 
