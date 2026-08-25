@@ -109,7 +109,7 @@ function module.pick()
     local x, y, z = player.get_selected_block(CLIENT_PLAYER.pid)
     local picking_id = block.get_picking_item(block.get(x, y, z))
 
-    if not picking_id then
+    if not picking_id or not x then
         return
     end
 
