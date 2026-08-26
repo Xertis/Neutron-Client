@@ -26,7 +26,7 @@ function on_world_open()
 
     if IS_REMOTE then
         local Player = import "core/classes/player"
-        CLIENT_PLAYER = Player.new(CLIENT_PID, SHELL.module.states.get_username())
+        CLIENT_PLAYER = Player.new(CLIENT_PID, SHELL.module.players.get_main_username())
         env.CLIENT_PLAYER = CLIENT_PLAYER
     end
 

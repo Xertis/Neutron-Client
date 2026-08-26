@@ -22,20 +22,9 @@ local function prepare_app(app)
     _G["external_app"] = protect_app
 end
 
-local function prepare_pause(pause_menu)
-    gui_util.add_page_dispatcher(function(name, args)
-        if name == "pause" then
-            name = pause_menu
-        end
-
-        return name, args
-    end)
-end
-
 return function(app)
     local post_init = SHELL.module.init or function() end
     prepare_app(app)
-    prepare_pause(SHELL.config.layouts.pause)
 
     table.insert_unique(CONTENT_PACKS, SHELL.prefix)
 

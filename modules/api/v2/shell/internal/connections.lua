@@ -37,8 +37,8 @@ function module.join(ip, id, identity, username, on_connect, on_disconnect)
                 next_state = protocol.States.Login
             }))
 
-            identity = SHELL.module.states.get_identity() or identity
-            username = SHELL.module.states.get_username() or username
+            identity = SHELL.module.players.get_main_identity() or identity
+            username = SHELL.module.players.get_main_username() or username
 
             buffer:put_packet(protocol.build_packet("client", protocol.ClientMsg.JoinGame, {
                 username = username,

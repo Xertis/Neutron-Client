@@ -37,34 +37,21 @@ local function init_connections()
     end
 end
 
-function api.register_as_shell(config, module)
+function api.register_as_shell(module)
     if SHELL then
         error("The shell is already registered")
     end
     local prefix = parse_path(debug.getinfo(2, 'S').source)
     SHELL = {
         prefix = prefix,
-        config = config,
         module = module,
     }
     init_connections()
-    api.extensions = table.merge(module.extensions or {}, api.extensions)
+    api.extensions = table.merge(api.extensions, module)
     return {
         api_version = API_VERSION,
         protocol_version = PROTOCOL_VERSION
     }
-end
-
-function api.__run_in_single(port)
-    local shell_module = import "init/single" ()
-    SHELL = {
-        prefix = "client",
-        config = {},
-        module = shell_module
-    }
-    init_connections()
-    api.extensions = {}
-    internal.connections.join("localhost:" .. port, 1, "player", "player", function() end, function() end)
 end
 
 function internal.run(app)
