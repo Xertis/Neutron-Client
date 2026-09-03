@@ -27,6 +27,7 @@ function Client:connect(address, port, name, state, id, meta)
         server.socket = socket
 
         socket:set_nodelay(true)
+        socket:send({0})
 
         if meta.on_connect then
             meta.on_connect(server)
@@ -39,39 +40,6 @@ function Client:connect(address, port, name, state, id, meta)
     end)
 
     self.network:tcp_connect(address, tonumber(port))
-
-    table.merge(server.meta, meta)
-
-    if id then
-        server.id = id
-    end
-
-    table.insert(self.servers, server)
-
-    return server
-end
-
-function Client:virtual_connect(address, port, name, state, id, meta)
-    local server = Server.new(false, nil, address, port, name)
-
-    self.network = Network.new("client", function(socket)
-        server.connecting = false
-        server.state = state or -1
-        server.socket = socket
-
-        socket:set_nodelay(true)
-
-        if meta.on_connect then
-            meta.on_connect(server)
-        end
-    end, function(_, err)
-        server.connecting = false
-        if meta.on_disconnect then
-            meta.on_disconnect(server, err)
-        end
-    end)
-
-    self.network:virtual_connect()
 
     table.merge(server.meta, meta)
 
