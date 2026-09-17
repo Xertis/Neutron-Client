@@ -75,7 +75,7 @@ module[protocol.ServerMsg.JoinSuccess] = function(server, packet)
     external_app.config_packs(CONTENT_PACKS)
 
     SERVER = server
-    CHUNK_LOADING_DISTANCE = packet.chunks_loading_distance
+    CHUNK_LOADING_DISTANCE = packet.max_view_distance
     CLIENT_PID = packet.pid
 
     external_app.new_world("", "41530140565755", PACK_ID .. ":void", CLIENT_PID)

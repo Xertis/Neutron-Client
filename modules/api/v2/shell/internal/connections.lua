@@ -13,11 +13,14 @@ function module.get_status(ip, id, name, on_status, on_disconnect, friends_list)
     CLIENT:connect(address, port, name, nil, id, {
         on_status = on_status,
         on_disconnect = on_disconnect,
+        on_connect = function (server)
+            server.socket:send({0})
+        end,
         friends_list = friends_list
     })
 end
 
-function module.join(ip, id, identity, username, on_connect, on_disconnect)
+function module.join(ip, id, identity, username, on_connect, on_disconnect, is_owned)
     local address, port = string.split_ip(ip)
     CLIENT:connect(address, port, "main", protocol.States.Login, id, {
         on_connect = function(server)
@@ -44,7 +47,12 @@ function module.join(ip, id, identity, username, on_connect, on_disconnect)
                 username = username,
                 identity = identity
             }))
+            server.socket:send({(is_owned and 1 or 0)})
             server.socket:send(buffer.bytes)
+
+            if is_owned then
+                server.owned = true
+            end
         end,
 
         on_disconnect = on_disconnect
@@ -70,6 +78,26 @@ function module.disconnect(server, on_disconnect)
     end
 
     on_disconnect()
+end
+
+local function single_connect(port, id, identity, username, on_connect)
+    module.join("127.0.0.1:" .. port, id, identity, username, on_connect, function()
+        single_connect(port, id, identity, username, on_connect)
+    end, true)
+end
+
+function module.run_single(name, id, identity, username, on_connect)
+    local packinfo = pack.get_info("server")
+    local path = packinfo.path
+
+    local port = network.find_free_port()
+    external_app.start_background_instance(path .. "/scripts/main.lua", "export:background.log", {
+        server_port = port,
+        world_name = name,
+        standalone = "true"
+    })
+
+    single_connect(port, id, identity, username, on_connect)
 end
 
 return module

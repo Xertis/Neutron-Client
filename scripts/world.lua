@@ -65,7 +65,9 @@ function on_world_tick()
     CLIENT_PLAYER:tick()
 
     local view_distance = external_app.get_setting("chunks.load-distance")
-    if IS_REMOTE and view_distance > CHUNK_LOADING_DISTANCE then
+
+    print(CHUNK_LOADING_DISTANCE, SERVER.owned)
+    if view_distance > CHUNK_LOADING_DISTANCE and not SERVER.owned then
         external_app.set_setting("chunks.load-distance", CHUNK_LOADING_DISTANCE)
     end
 

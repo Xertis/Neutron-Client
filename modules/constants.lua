@@ -1,8 +1,6 @@
 PACK_ID = "client"
 SHELL = nil
 
-CHUNK_LOADING_DISTANCE = 0
-
 COLORS = {
     red = "[#ff0000]",
     yellow = "[#ffff00]",

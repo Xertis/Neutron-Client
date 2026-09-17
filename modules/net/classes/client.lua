@@ -27,7 +27,6 @@ function Client:connect(address, port, name, state, id, meta)
         server.socket = socket
 
         socket:set_nodelay(true)
-        socket:send({0})
 
         if meta.on_connect then
             meta.on_connect(server)
