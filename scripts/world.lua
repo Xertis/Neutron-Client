@@ -9,7 +9,6 @@ local loaded_chunks = {}
 
 local SERVER = nil
 local CLIENT_PLAYER = nil
-local CHUNK_LOADING_DISTANCE = nil
 
 function on_world_open()
     protocol = import "net/protocol/protocol"
@@ -22,7 +21,6 @@ function on_world_open()
     -------------------------
     local env = session.get("neutron-client-env")
     SERVER = env.SERVER
-    CHUNK_LOADING_DISTANCE = env.CHUNK_LOADING_DISTANCE
 
     if IS_REMOTE then
         local Player = import "core/classes/player"
