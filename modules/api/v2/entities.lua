@@ -75,6 +75,10 @@ function module.sync(name)
     desynced_entities[name] = nil
 end
 
+function module.server_to_client_uid(uid)
+	return entities_uids[uid]
+end
+
 function module.set_handler(triggers, handler)
     for _, entity in ipairs(triggers) do
         local entity_handlers = table.set_default(handlers, entity, {})
