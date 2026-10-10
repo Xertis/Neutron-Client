@@ -9,7 +9,6 @@ local loaded_chunks = {}
 
 local SERVER = nil
 local CLIENT_PLAYER = nil
-local CHUNK_LOADING_DISTANCE = nil
 
 function on_world_open()
     protocol = import "net/protocol/protocol"
@@ -22,7 +21,6 @@ function on_world_open()
     -------------------------
     local env = session.get("neutron-client-env")
     SERVER = env.SERVER
-    CHUNK_LOADING_DISTANCE = env.CHUNK_LOADING_DISTANCE
 
     if IS_REMOTE then
         local Player = import "core/classes/player"
@@ -65,7 +63,9 @@ function on_world_tick()
     CLIENT_PLAYER:tick()
 
     local view_distance = external_app.get_setting("chunks.load-distance")
-    if IS_REMOTE and view_distance > CHUNK_LOADING_DISTANCE then
+
+    print(CHUNK_LOADING_DISTANCE, SERVER.owned)
+    if view_distance > CHUNK_LOADING_DISTANCE and not SERVER.owned then
         external_app.set_setting("chunks.load-distance", CHUNK_LOADING_DISTANCE)
     end
 

@@ -265,4 +265,8 @@ module[protocol.ServerMsg.Text3DAxis] = function(server, packet)
     api_text3d.apply(state)
 end
 
+module[protocol.ServerMsg.MaxViewDistanceUpdate] = function(server, packet)
+    CHUNK_LOADING_DISTANCE = packet.distance
+end
+
 return module

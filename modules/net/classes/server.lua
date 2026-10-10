@@ -20,6 +20,7 @@ function Server.new(active, socket, address, port, name)
     self.ping = { ping = 0, last_upd = 0 }
     self.meta = { max_online = 0 }
     self.ip = address .. ':' .. port
+    self.owned = false
 
     self.handlers = {
         on_connect = nil,
