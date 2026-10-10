@@ -61,6 +61,10 @@ function module.wrap_components(entity, server_uid)
 
     entity.components["client:controller"] = chunk_env
 
+    if entity.ordered_components then
+        table.insert(entity.ordered_components, chunk_env)
+    end
+
     wrap_components(components, entity)
 end
 

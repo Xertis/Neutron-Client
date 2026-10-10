@@ -22,6 +22,8 @@ end
 function Network:tcp_connect(address, port)
     self.socket = network.tcp_connect(address, port, self.callback, self.err_callback)
 
+    self.socket:set_nodelay(true)
+
     return self.socket
 end
 
