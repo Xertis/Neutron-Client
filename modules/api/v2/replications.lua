@@ -1,5 +1,9 @@
 local messages = import "api/v2/messages"
 
+local wrap_keys = {
+    "create_listener", "remove_replica"
+}
+
 local Replication = {}
 
 local REPLICATORS = {}
@@ -51,6 +55,7 @@ local function compile_schema(schema)
     return entries
 end
 
+-- FIXME: unused function
 local function diff(compiled, new, old)
     local result = nil
     for i = 1, #compiled do
@@ -95,6 +100,17 @@ end
 local Replicator = {}
 Replicator.__index = Replicator
 
+local function unwrap(proxy)
+    if not proxy.__value then
+        local schema = proxy.schema_provider();
+
+        proxy.schema = schema;
+        proxy.__value = Replicator.new(proxy.pack, proxy.event, schema);
+    end
+
+    return proxy.__value;
+end
+
 function Replication.new(pack, event, schema)
     if has_null(schema) then
         error("Replication схема не может иметь Nilable тип")
@@ -131,6 +147,20 @@ function Replication.new(pack, event, schema)
     end)
 
     return self
+end
+
+function Replication.wrap_new(pack, event, schema_provider)
+    local proxy = { pack = pack, event = event, schema_provider = schema_provider };
+
+    for _, key in ipairs(wrap_keys) do
+        proxy[key] = function(_, ...)
+            local msg = unwrap(proxy);
+
+            return msg[key](msg, ...);
+        end
+    end
+
+    return proxy;
 end
 
 function Replicator:create_listener(id, initial_value, on_recv)
