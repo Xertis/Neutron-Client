@@ -60,11 +60,18 @@ function PredictedEvent.new(pack, event, schema, config)
         self.requested_instances[data.request_id] = nil
 
         if data.accepted then
+            if requested_instance.interrupted then
+                self.messages.c_interrupt:send({
+                    event_id = data.event_id
+                })
+                return
+            end
+
             self.instances[data.event_id] = requested_instance
             requested_instance.event_id = data.event_id
             requested_instance.active = true
             self.config.on_ack_start(requested_instance)
-        else
+        elseif not requested_instance.interrupted then
             self.config.on_reject(requested_instance)
         end
     end)
@@ -126,6 +133,7 @@ end
 function Instance.new(predicted, event_id, request_id, data, progress)
     local instance = setmetatable({
         instance_id = next_instance_id,
+        interrupted = false,
         event_id = event_id,
         request_id = request_id,
         data = data,
@@ -150,12 +158,17 @@ function Instance:get_elapsed()
 end
 
 function Instance:interrupt()
-    if not self.active then return end
+    if self.interrupted then return end
+    if self.event_id and not self.active then return end
 
     self.active = false
-    self.predicted.messages.c_interrupt:send({
-        event_id = self.event_id
-    })
+    self.interrupted = true
+
+    if self.event_id then
+        self.predicted.messages.c_interrupt:send({
+            event_id = self.event_id
+        })
+    end
 end
 
 return PredictedEvent
