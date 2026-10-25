@@ -86,15 +86,16 @@ local function single_connect(port, id, identity, username, on_connect)
     end, true)
 end
 
-function module.run_single(name, id, identity, username, on_connect)
+function module.run_single(config, id, identity, username, on_connect)
     id = tostring(id)
     local packinfo = pack.get_info("server")
     local path = packinfo.path
 
     local port = network.find_free_port()
+    config.server.port = port
+
     external_app.start_background_instance(path .. "/scripts/main.lua", "export:background.log", {
-        server_port = port,
-        world_name = name,
+        config = json.tostring(config),
         standalone = "true"
     })
 
