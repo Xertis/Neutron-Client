@@ -1,6 +1,7 @@
 require "init/requires"
 local packs = import "api/v2/shell/internal/packs"
 local sandbox = import "api/v2/shell/extensions/sandbox"
+local runtime = import "init/runtime"
 
 local internal = {
     packs = packs
@@ -37,18 +38,26 @@ local function init_connections()
     end
 end
 
+local function bind_shell(shell)
+    SHELL = shell
+    init_connections()
+    api.extensions = table.merge(api.extensions, shell.module)
+end
+
 function api.register_as_shell(module)
     if SHELL then
         error("The shell is already registered")
     end
     local prefix = parse_path(debug.getinfo(2, 'S').source)
-    SHELL = {
+    local shell = {
         trusted = {},
         prefix = prefix,
         module = module,
     }
-    init_connections()
-    api.extensions = table.merge(api.extensions, module)
+
+    session.get("neutron-runtime").shell = shell
+
+    bind_shell(shell)
     logger.log("The shell was registered")
     return {
         api_version = API_VERSION,
@@ -65,4 +74,14 @@ function internal.run(app)
 end
 
 setmetatable(api.internal, meta)
+
+do
+    local saved = session.get("neutron-runtime").shell
+    if saved and not SHELL then
+        bind_shell(saved)
+        runtime.attach()
+        logger.log("The shell was restored")
+    end
+end
+
 return api
