@@ -1,3 +1,5 @@
+local shell_packs = import "api/v2/shell/internal/packs"
+
 local function prepare_app(app)
     local protect_app = {}
 
@@ -13,7 +15,9 @@ local function prepare_app(app)
         local unresetable = { "client" }
 
         if SHELL then
-            unresetable = { "client", SHELL.prefix }
+            for _, id in ipairs(shell_packs.get_shell_packs()) do
+                table.insert_unique(unresetable, id)
+            end
         end
 
         app.reset_content(unresetable)

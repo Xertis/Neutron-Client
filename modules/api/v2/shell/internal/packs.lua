@@ -12,8 +12,28 @@ function module.set_packs(packs)
     CONTENT_PACKS = packs
 end
 
+function module.get_shell_packs()
+    local all = table.unique(table.merge(pack.get_available(), pack.get_installed()))
+    local result = {}
+
+    if table.has(all, SHELL.prefix) then
+        table.insert_unique(result, SHELL.prefix)
+    end
+
+    for id in pairs(SHELL.trusted) do
+        if table.has(all, id) then
+            table.insert_unique(result, id)
+        end
+    end
+
+    return result
+end
+
 function module.reset_packs()
-    CONTENT_PACKS = {"client", SHELL.prefix}
+    CONTENT_PACKS = { "client" }
+    for _, id in ipairs(module.get_shell_packs()) do
+        table.insert_unique(CONTENT_PACKS, id)
+    end
 end
 
 function module.get_packs()
