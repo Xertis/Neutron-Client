@@ -30,7 +30,9 @@ return function(app)
     local post_init = SHELL.module.init or function() end
     prepare_app(app)
 
-    table.insert_unique(CONTENT_PACKS, SHELL.prefix)
+    for _, id in ipairs(shell_packs.get_shell_packs()) do
+        table.insert_unique(CONTENT_PACKS, id)
+    end
 
     local Client = import "client:net/classes/client"
 
