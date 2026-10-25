@@ -55,13 +55,12 @@ ClientPipe:add_middleware(function(server)
     if not co then
         co = coroutine.create(function()
             while true do
-                if List.is_empty(server.received_packets) then
+                if List.is_empty(server.received_packets) or meta.pending_join then
                     coroutine.yield()
                 else
                     local packet = List.popleft(server.received_packets)
                     local success, err = pcall(function()
                         if server.state ~= protocol.States.Active then
-                            --debug.print(packet)
                             in_menu_handlers[packet.packet_type](server, packet)
                         elseif server.state == protocol.States.Active and hud then
                             in_game_handlers[packet.packet_type](server, packet)
@@ -83,7 +82,20 @@ ClientPipe:add_middleware(function(server)
 end)
 
 ClientPipe:add_middleware(function(server)
-    if server.state == protocol.States.Active then
+    local packet = server.meta.pending_join
+    if packet then
+        server.meta.pending_join = nil
+        local success, err = pcall(in_menu_handlers.finish_join, server, packet)
+        if not success then
+            logger.log("Error while joining the world: " .. tostring(err), 'E')
+            if CLIENT then CLIENT:disconnect() end
+        end
+    end
+    return server
+end)
+
+ClientPipe:add_middleware(function(server)
+    if server.state == protocol.States.Active and CLIENT_PLAYER then
         server_pipe:process(server)
     end
 

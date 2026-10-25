@@ -67,10 +67,10 @@ module[protocol.ServerMsg.PacksList] = function(server, packet)
 end
 
 module[protocol.ServerMsg.JoinSuccess] = function(server, packet)
-    server.state = protocol.States.Active
+    server.meta.pending_join = packet
+end
 
-    server.active = true
-
+function module.finish_join(server, packet)
     external_app.reset_content()
     external_app.config_packs(CONTENT_PACKS)
 
@@ -102,6 +102,9 @@ module[protocol.ServerMsg.JoinSuccess] = function(server, packet)
     player.set_infinite_items(CLIENT_PID, player_data.infinite_items)
     player.set_instant_destruction(CLIENT_PID, player_data.instant_destruction)
     player.set_interaction_distance(CLIENT_PID, player_data.interaction_distance)
+
+    server.active = true
+    server.state = protocol.States.Active
 end
 
 return module
