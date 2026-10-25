@@ -48,6 +48,7 @@ function api.register_as_shell(module)
     }
     init_connections()
     api.extensions = table.merge(api.extensions, module)
+    logger.log("The shell was registered")
     return {
         api_version = API_VERSION,
         protocol_version = PROTOCOL_VERSION
