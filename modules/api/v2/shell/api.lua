@@ -23,7 +23,7 @@ end
 local meta = {
     __index = function(table, key)
         local prefix = parse_path(debug.getinfo(2, 'S').source)
-        if prefix == "client" or prefix == SHELL.prefix then
+        if prefix == "client" or prefix == SHELL.prefix or SHELL.trusted[prefix] then
             return internal[key]
         end
         return error(
@@ -43,6 +43,7 @@ function api.register_as_shell(module)
     end
     local prefix = parse_path(debug.getinfo(2, 'S').source)
     SHELL = {
+        trusted = {},
         prefix = prefix,
         module = module,
     }
@@ -53,6 +54,10 @@ function api.register_as_shell(module)
         api_version = API_VERSION,
         protocol_version = PROTOCOL_VERSION
     }
+end
+
+function internal.add_trusted_pack(prefix)
+    SHELL.trusted[prefix] = true
 end
 
 function internal.run(app)
