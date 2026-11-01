@@ -1,29 +1,9 @@
 local protocol = import "net/protocol/protocol"
 local hash = import "lib/crypto/hash"
+local content_loader = import "init/content_loader"
 
 local module = {}
-
-module["handshake"] = function(server)
-    if server.state == -1 then
-        local major, minor = external_app.get_version()
-        local engine_version = string.format("%s.%s.0", major, minor)
-
-        local buffer = protocol.create_databuffer()
-        buffer:put_packet(protocol.build_packet("client", protocol.ClientMsg.HandShake, {
-            protocol_reference = "Neutron",
-            protocol_version = protocol.Version,
-            engine_version = engine_version,
-            api_version = API_VERSION,
-            friends_list = server.meta.friends_list,
-            next_state = protocol.States.Status
-        }))
-        buffer:put_packet(protocol.build_packet("client", protocol.ClientMsg.StatusRequest, {}))
-
-        server.socket:send(buffer.bytes)
-
-        server.state = protocol.States.Status
-    end
-end
+local content_sources = {}
 
 module[protocol.ServerMsg.StatusResponse] = function(server, packet)
     server.meta.max_online = packet.max
@@ -39,25 +19,49 @@ module[protocol.ServerMsg.PacksList] = function(server, packet)
     local packs = packet.packs
 
     local packs_all = table.unique(table.merge(pack.get_available(), pack.get_installed()))
+    local cached_packs = {}
     local hashes = {}
+    content_sources = {}
 
-    table.filter(packs, function(_, val)
-        return table.has(packs_all, val)
-    end)
-
-    for i = 1, #packs do
-        table.insert_unique(CONTENT_PACKS, packs[i])
+    if (file.isdir(PACKS_CACHE_PATH) == true) then
+        cached_packs = file.list(PACKS_CACHE_PATH)
+        table.filter(cached_packs, function(_, path)
+            return file.isdir(path)
+        end)
+        table.sort(cached_packs)
     end
 
-    local events_handlers = table.copy(events.handlers)
+    local function add_pack_source(pack_id, source)
+        if (content_sources[pack_id] == nil) then
+            content_sources[pack_id] = {}
+        end
+        table.insert(content_sources[pack_id], source)
+    end
 
-    events.handlers = table.merge(events_handlers, events.handlers)
+    for _, pack_id in ipairs(packs) do
+        if (table.has(packs_all, pack_id)) then
+            add_pack_source(pack_id, "")
+            table.insert_unique(CONTENT_PACKS, pack_id)
+            table.insert(hashes, {
+                pack = pack_id,
+                hash = hash.hash_pack(pack_id)
+            })
+        end
+        for _, path in ipairs(cached_packs) do
+            local id, directory_hash = unpack(string.split(file.name(path), "#"))
+            if (pack_id ~= id or directory_hash ~= hash.hash_directory(path)) then
+                goto continue
+            end
 
-    for i, pack in ipairs(packs) do
-        table.insert(hashes, {
-            pack = pack,
-            hash = hash.hash_mods({ pack })
-        })
+            add_pack_source(pack_id, path)
+            table.insert_unique(CONTENT_PACKS, pack_id)
+            table.insert(hashes, {
+                pack = pack_id,
+                hash = directory_hash
+            })
+
+            ::continue::
+        end
     end
 
     local buffer = protocol.create_databuffer()
@@ -72,6 +76,18 @@ end
 
 function module.finish_join(server, packet)
     external_app.reset_content()
+
+    local sources = external_app.get_content_sources()
+
+    local content_hash_indexes = json.parse(packet.content_hash_indexes)
+    for pack_id, index in pairs(content_hash_indexes) do
+        local source = content_sources[pack_id][index]
+        if (#source ~= 0) then
+            table.insert(sources, 1, source)
+        end
+    end
+
+    external_app.set_content_sources(sources)
     external_app.config_packs(CONTENT_PACKS)
 
     SERVER = server
@@ -105,6 +121,19 @@ function module.finish_join(server, packet)
 
     server.active = true
     server.state = protocol.States.Active
+end
+
+module[protocol.ServerMsg.ContentData] = function(server, packet)
+    if (packet.next_state == 1) then
+        content_loader.finish(server.ip)
+        return
+    end
+    content_loader.feed(server.ip, packet.bytes)
+
+    server:push_packet(protocol.ClientMsg.ContentRequest, {
+        content_list = {},
+        next_state = 1
+    })
 end
 
 return module

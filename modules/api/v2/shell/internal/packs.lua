@@ -58,4 +58,8 @@ function module.reload_packs(use_core)
     else external_app.load_content() end
 end
 
+function module.get_cache_path()
+    return PACKS_CACHE_PATH
+end
+
 return module

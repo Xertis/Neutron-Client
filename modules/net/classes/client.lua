@@ -2,6 +2,7 @@ local Server = import "net/classes/server"
 local protocol = import "net/protocol/protocol"
 local Client_pipe = import "net/pipelines/main"
 local Network = import "net/classes/network"
+local content_loader = import "init/content_loader"
 
 local Client = {}
 Client.__index = Client
@@ -97,6 +98,7 @@ function Client:tick()
                 socket:close()
             end
 
+            content_loader.stop(server.ip)
             table.remove_value(self.servers, server)
         end
 

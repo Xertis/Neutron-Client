@@ -46,10 +46,6 @@ ClientPipe:add_middleware(function(server)
 end)
 
 ClientPipe:add_middleware(function(server)
-    if server.state == -1 then
-        in_menu_handlers["handshake"](server)
-    end
-
     local meta = server.meta
     local co = meta.process_co
     if not co then
