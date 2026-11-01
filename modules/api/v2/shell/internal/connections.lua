@@ -1,4 +1,5 @@
 local protocol = import "net/protocol/protocol"
+local content_loader = import "init/content_loader"
 
 local module = {}
 
@@ -15,6 +16,24 @@ function module.get_status(ip, id, name, on_status, on_disconnect, friends_list)
         on_disconnect = on_disconnect,
         on_connect = function (server)
             server.socket:send({0})
+
+            local major, minor = external_app.get_version()
+            local engine_version = string.format("%s.%s.0", major, minor)
+
+            local buffer = protocol.create_databuffer()
+            buffer:put_packet(protocol.build_packet("client", protocol.ClientMsg.HandShake, {
+                protocol_reference = "Neutron",
+                protocol_version = protocol.Version,
+                engine_version = engine_version,
+                api_version = API_VERSION,
+                friends_list = server.meta.friends_list,
+                next_state = protocol.States.Status
+            }))
+            buffer:put_packet(protocol.build_packet("client", protocol.ClientMsg.StatusRequest, {}))
+
+            server.socket:send(buffer.bytes)
+
+            server.state = protocol.States.Status
         end,
         friends_list = friends_list
     })
@@ -99,6 +118,26 @@ function module.run_single(name, id, identity, username, on_connect)
     })
 
     single_connect(port, id, identity, username, on_connect)
+end
+
+function module.request_content(ip, server_name, content_list, event_funcs)
+    local address, port = string.split_ip(ip)
+
+    return CLIENT:connect(address, port, server_name, nil, nil, {
+        on_connect = function(server)
+            local missing_content = {}
+            for _, pack_info in ipairs(content_list) do
+                table.insert(missing_content, pack_info.id)
+            end
+
+            content_loader.start(server.ip, content_list, event_funcs)
+            server.socket:send({0})
+            server:push_packet(protocol.ClientMsg.ContentRequest, {
+                content_list = missing_content,
+                next_state = 0
+            })
+        end
+    })
 end
 
 return module

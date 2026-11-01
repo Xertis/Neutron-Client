@@ -9,3 +9,4 @@ SERVER = nil
 IS_REMOTE = true
 SENDED_VIEW_DISTANCE = nil
 CHUNK_LOADING_DISTANCE = 0
+PACKS_CACHE_PATH = "export:packs_cache/"
